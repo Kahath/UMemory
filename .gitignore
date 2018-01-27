@@ -1,0 +1,12 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/.git
+/packages
+/UMemory/bin
+/UMemory/.vs
+/UMemory/obj
+/UMemory/*.user
+
