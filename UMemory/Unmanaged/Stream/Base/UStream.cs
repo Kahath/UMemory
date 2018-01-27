@@ -1,4 +1,9 @@
-﻿using System;
+﻿/*
+ * Copyright © Kahath 2018
+ * Licensed under MIT license.
+ */
+
+using System;
 using System.Runtime.InteropServices;
 using System.Security;
 using UMemory.Unmanaged.Array;

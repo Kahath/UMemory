@@ -1,4 +1,9 @@
-﻿using System;
+﻿/*
+ * Copyright © Kahath 2018
+ * Licensed under MIT license.
+ */
+
+using System;
 using System.Security;
 using System.Text;
 using UMemory.Unmanaged.Enums;
