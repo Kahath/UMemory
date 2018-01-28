@@ -45,10 +45,6 @@ namespace UMemory.Unmanaged.Stream.Core
 			_encoding = Encoding.UTF8;
 		}
 
-		~UMemoryStream()
-		{
-		}
-
 		#endregion
 
 		#region Methods
@@ -60,8 +56,7 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// </summary>
 		/// <typeparam name="T">Type of instance to write.</typeparam>
 		/// <param name="data">Instance to write.</param>
-		public void Write<T>(T data)
-			where T : IUMemoryWrite
+		public void Write(IUMemoryWrite data)
 		{
 			if (data == null)
 				throw new NullReferenceException("data");

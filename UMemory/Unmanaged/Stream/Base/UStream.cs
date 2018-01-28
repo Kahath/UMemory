@@ -86,10 +86,6 @@ namespace UMemory.Unmanaged.Stream.Base
 			_isx64 = IntPtr.Size == 8;
 		}
 
-		~UStream()
-		{
-		}
-
 		#endregion
 
 		#region Methods
@@ -333,7 +329,7 @@ namespace UMemory.Unmanaged.Stream.Base
 		{
 			if (unchecked((int)positionPtr & 0x01) == 0 && !_changeOrder)
 				_array[(short*)positionPtr] = data;
-			else if (_changeOrder)
+			else if (_endianessType == EndiannessType.BigEndian)
 			{
 				_array[positionPtr + 1] = (byte)data;
 				_array[positionPtr] = (byte)(data >> 8);
@@ -357,7 +353,7 @@ namespace UMemory.Unmanaged.Stream.Base
 		{
 			if (unchecked((int)positionPtr & 0x03) == 0 && !_changeOrder)
 				_array[(int*)positionPtr] = data;
-			else if (_changeOrder)
+			else if (_endianessType == EndiannessType.BigEndian)
 			{
 				_array[positionPtr + 3] = (byte)data;
 				_array[positionPtr + 2] = (byte)(data >> 8);
@@ -386,7 +382,7 @@ namespace UMemory.Unmanaged.Stream.Base
 		{
 			if (unchecked((int)positionPtr & 0x07) == 0 && !_changeOrder)
 				_array[(long*)positionPtr] = data;
-			else if (_changeOrder)
+			else if (_endianessType == EndiannessType.BigEndian)
 			{
 				_array[positionPtr + 7] = (byte)data;
 				_array[positionPtr + 6] = (byte)(data >> 8);
@@ -564,7 +560,7 @@ namespace UMemory.Unmanaged.Stream.Base
 
 			if (unchecked((int)positionPtr & 0x01) == 0 && !_changeOrder)
 				retVal = _array[(short*)positionPtr];
-			else if (_changeOrder)
+			else if (_endianessType == EndiannessType.BigEndian)
 			{
 				retVal |= (short)_array[positionPtr + 1];
 				retVal |= (short)(_array[positionPtr] << 8);
@@ -590,7 +586,7 @@ namespace UMemory.Unmanaged.Stream.Base
 
 			if (unchecked((int)positionPtr & 0x03) == 0 && !_changeOrder)
 				retVal = _array[(int*)positionPtr];
-			else if (_changeOrder)
+			else if (_endianessType == EndiannessType.BigEndian)
 			{
 				retVal |= (int)_array[positionPtr + 3];
 				retVal |= (int)(_array[positionPtr + 2]) << 8;
@@ -620,7 +616,7 @@ namespace UMemory.Unmanaged.Stream.Base
 
 			if (((int)positionPtr & 0x07) == 0 && !_changeOrder)
 				retVal = _array[(long*)positionPtr];
-			else if (_changeOrder)
+			else if (_endianessType == EndiannessType.BigEndian)
 			{
 				retVal |= (long)_array[positionPtr + 7];
 				retVal |= (long)(_array[positionPtr + 6]) << 8;
