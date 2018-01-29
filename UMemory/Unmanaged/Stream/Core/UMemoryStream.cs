@@ -45,10 +45,6 @@ namespace UMemory.Unmanaged.Stream.Core
 			_encoding = Encoding.UTF8;
 		}
 
-		~UMemoryStream()
-		{
-		}
-
 		#endregion
 
 		#region Methods
@@ -60,8 +56,7 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// </summary>
 		/// <typeparam name="T">Type of instance to write.</typeparam>
 		/// <param name="data">Instance to write.</param>
-		public void Write<T>(T data)
-			where T : IUMemoryWrite
+		public void Write(IUMemoryWrite data)
 		{
 			if (data == null)
 				throw new NullReferenceException("data");
@@ -85,6 +80,16 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// </summary>
 		/// <param name="data">Byte value to write.</param>
 		public void Write(byte data)
+		{
+			WriteOnPtr(PositionPtr, data);
+		}
+
+		/// <summary>
+		/// Writes sbyte value to current stream position.
+		/// Increases stream position.
+		/// </summary>
+		/// <param name="data">SByte value to write.</param>
+		public void Write(sbyte data)
 		{
 			WriteOnPtr(PositionPtr, data);
 		}
@@ -186,14 +191,49 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// <param name="data">String value to write.</param>
 		public void Write(string data)
 		{
+			int length = _encoding.GetByteCount(data);
+			Write7BitEncodedInt(length);
+
+			if (!CanSeek(length))
+				throw new IndexOutOfRangeException();
+
 			fixed (char* chrPtr = data)
 			{
+<<<<<<< HEAD
 				int length = _encoding.GetByteCount(data);
 				Write7BitEncodedInt(length);
-
+=======
 				_encoding.GetBytes(chrPtr, data.Length, PositionPtr, length);
+			}
 
-				Position += length;
+			Position += length;
+		}
+
+		/// <summary>
+		/// Writes null terminated string value to current stream position.
+		/// Increases stream position
+		/// </summary>
+		/// <param name="data">String value to write.</param>
+		public void WriteCString(string data)
+		{
+			if (String.IsNullOrEmpty(data))
+			{
+				Write((byte)0);
+			}
+			else
+			{
+				int count = _encoding.GetByteCount(data);
+				if (!CanSeek(count))
+					throw new IndexOutOfRangeException();
+>>>>>>> 91c2c13ef1f0c8e39e85fddbe5f19309ec826c19
+
+				fixed (char* chrPtr = data)
+				{
+					_encoding.GetBytes(chrPtr, data.Length, PositionPtr, count);
+				}
+
+				Position += count;
+				Write((byte)0);
 			}
 		}
 
@@ -407,7 +447,7 @@ namespace UMemory.Unmanaged.Stream.Core
 			int length = Read7BitEncodedInt();
 
 			if (!CanSeek(length))
-				throw new ArgumentOutOfRangeException();
+				throw new IndexOutOfRangeException();
 
 			string retVal = _encoding.GetString(PositionPtr, length);
 			Position += length;
@@ -421,10 +461,21 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// <returns>Read string value.</returns>
 		public string ReadCString()
 		{
+<<<<<<< HEAD
 			int length = Seek((byte)0);
 
 			string retVal = _encoding.GetString(PositionPtr, length);
 			Skip(1);
+=======
+			int count = Seek((byte)0);
+
+			if (!CanSeek(count))
+				throw new IndexOutOfRangeException();
+
+			string retVal = _encoding.GetString(PositionPtr, count);
+			Position += count;
+			ReadByte();
+>>>>>>> 91c2c13ef1f0c8e39e85fddbe5f19309ec826c19
 
 			return retVal;
 		}
@@ -437,13 +488,20 @@ namespace UMemory.Unmanaged.Stream.Core
 		public byte[] ReadBytes()
 		{
 			int length = Read7BitEncodedInt();
+			return ReadBytes(length);
+		}
 
-			if (!CanSeek(length))
-				throw new ArgumentOutOfRangeException();
+		/// <summary>
+		/// Reads byte array value on current stream position with given elements count.
+		/// </summary>
+		/// <param name="count">Array elements count.</param>
+		/// <returns>Read byte array value.</returns>
+		public byte[] ReadBytes(int count)
+		{
+			byte[] retVal = new byte[count];
 
-			byte[] retVal = new byte[length];
-			CopyTo(Position, retVal, 0, (uint)length);
-			Position += length;
+			CopyTo(Position, retVal, 0, (uint)count);
+			Position += count;
 
 			return retVal;
 		}
