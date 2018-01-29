@@ -199,10 +199,6 @@ namespace UMemory.Unmanaged.Stream.Core
 
 			fixed (char* chrPtr = data)
 			{
-<<<<<<< HEAD
-				int length = _encoding.GetByteCount(data);
-				Write7BitEncodedInt(length);
-=======
 				_encoding.GetBytes(chrPtr, data.Length, PositionPtr, length);
 			}
 
@@ -225,7 +221,6 @@ namespace UMemory.Unmanaged.Stream.Core
 				int count = _encoding.GetByteCount(data);
 				if (!CanSeek(count))
 					throw new IndexOutOfRangeException();
->>>>>>> 91c2c13ef1f0c8e39e85fddbe5f19309ec826c19
 
 				fixed (char* chrPtr = data)
 				{
@@ -234,31 +229,6 @@ namespace UMemory.Unmanaged.Stream.Core
 
 				Position += count;
 				Write((byte)0);
-			}
-		}
-
-		/// <summary>
-		/// Writes null terminated string value to current stream position.
-		/// Increases stream position
-		/// </summary>
-		/// <param name="data">String value to write.</param>
-		public void WriteCString(string data)
-		{
-			if (String.IsNullOrEmpty(data))
-			{
-				Write((byte)0);
-			}
-			else
-			{
-				fixed (char* chrPtr = data)
-				{
-					int length = _encoding.GetByteCount(data);
-					_encoding.GetBytes(chrPtr, data.Length, PositionPtr, length);
-
-					Position += length;
-
-					Write((byte)0);
-				}
 			}
 		}
 
@@ -461,12 +431,6 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// <returns>Read string value.</returns>
 		public string ReadCString()
 		{
-<<<<<<< HEAD
-			int length = Seek((byte)0);
-
-			string retVal = _encoding.GetString(PositionPtr, length);
-			Skip(1);
-=======
 			int count = Seek((byte)0);
 
 			if (!CanSeek(count))
@@ -475,7 +439,6 @@ namespace UMemory.Unmanaged.Stream.Core
 			string retVal = _encoding.GetString(PositionPtr, count);
 			Position += count;
 			ReadByte();
->>>>>>> 91c2c13ef1f0c8e39e85fddbe5f19309ec826c19
 
 			return retVal;
 		}
@@ -500,18 +463,6 @@ namespace UMemory.Unmanaged.Stream.Core
 		{
 			byte[] retVal = new byte[count];
 
-			CopyTo(Position, retVal, 0, (uint)count);
-			Position += count;
-
-			return retVal;
-		}
-
-		public byte[] ReadBytes(int count)
-		{
-			if (!CanSeek(count))
-				throw new ArgumentOutOfRangeException();
-
-			byte[] retVal = new byte[count];
 			CopyTo(Position, retVal, 0, (uint)count);
 			Position += count;
 

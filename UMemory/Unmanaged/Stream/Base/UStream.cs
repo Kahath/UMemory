@@ -147,7 +147,6 @@ namespace UMemory.Unmanaged.Stream.Base
 		/// Seeks for value from current stream position.
 		/// </summary>
 		/// <param name="value">Byte value to seek.</param>
-<<<<<<< HEAD
 		/// <returns>Length from current position to seek value.</returns>
 		public int Seek(byte value)
 		{
@@ -158,18 +157,6 @@ namespace UMemory.Unmanaged.Stream.Base
 				++position;
 
 			return position;
-=======
-		/// <returns>Number of elements to seek value.</returns>
-		public int Seek(byte value)
-		{
-			byte* positionPtr = PositionPtr;
-			int count = 0;
-
-			while (Array[positionPtr + count] != value)
-				++count;
-
-			return count;
->>>>>>> 91c2c13ef1f0c8e39e85fddbe5f19309ec826c19
 		}
 
 		/// <summary>
