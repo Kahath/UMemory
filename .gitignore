@@ -9,4 +9,7 @@
 /UMemory/.vs
 /UMemory/obj
 /UMemory/*.user
-
+bin
+obj
+.user
+.suo

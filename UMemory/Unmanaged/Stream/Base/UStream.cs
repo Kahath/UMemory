@@ -144,13 +144,29 @@ namespace UMemory.Unmanaged.Stream.Base
 		}
 
 		/// <summary>
+		/// Seeks for value from current stream position.
+		/// </summary>
+		/// <param name="value">Byte value to seek.</param>
+		/// <returns>Number of elements to seek value.</returns>
+		public int Seek(byte value)
+		{
+			byte* positionPtr = PositionPtr;
+			int count = 0;
+
+			while (Array[positionPtr + count] != value)
+				++count;
+
+			return count;
+		}
+
+		/// <summary>
 		/// Check if offset is withing the length of the array.
 		/// </summary>
 		/// <param name="offset"></param>
 		/// <returns>Boolean value.</returns>
 		public bool CanSeek(int offset)
 		{
-			return offset >= 0 || offset <= Array.Length;
+			return offset >= 0 && offset <= Array.Length;
 		}
 
 		#endregion

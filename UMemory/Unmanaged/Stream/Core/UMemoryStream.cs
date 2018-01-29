@@ -85,6 +85,16 @@ namespace UMemory.Unmanaged.Stream.Core
 		}
 
 		/// <summary>
+		/// Writes sbyte value to current stream position.
+		/// Increases stream position.
+		/// </summary>
+		/// <param name="data">SByte value to write.</param>
+		public void Write(sbyte data)
+		{
+			WriteOnPtr(PositionPtr, data);
+		}
+
+		/// <summary>
 		/// Writes char value to current stream position.
 		/// Increases stream position.
 		/// </summary>
@@ -178,21 +188,47 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// Writes string value to current stream position with prefixed length as 7bit encoded int.
 		/// Increases stream position.
 		/// </summary>
-		/// <param name="data">string value to write.</param>
+		/// <param name="data">String value to write.</param>
 		public void Write(string data)
 		{
+			int length = _encoding.GetByteCount(data);
+			Write7BitEncodedInt(length);
+
+			if (!CanSeek(length))
+				throw new IndexOutOfRangeException();
+
 			fixed (char* chrPtr = data)
 			{
-				int length = _encoding.GetByteCount(data);
+				_encoding.GetBytes(chrPtr, data.Length, PositionPtr, length);
+			}
 
-				if (!CanSeek(length + 1))
+			Position += length;
+		}
+
+		/// <summary>
+		/// Writes null terminated string value to current stream position.
+		/// Increases stream position
+		/// </summary>
+		/// <param name="data">String value to write.</param>
+		public void WriteCString(string data)
+		{
+			if (String.IsNullOrEmpty(data))
+			{
+				Write((byte)0);
+			}
+			else
+			{
+				int count = _encoding.GetByteCount(data);
+				if (!CanSeek(count))
 					throw new IndexOutOfRangeException();
 
-				Write7BitEncodedInt(length);
+				fixed (char* chrPtr = data)
+				{
+					_encoding.GetBytes(chrPtr, data.Length, PositionPtr, count);
+				}
 
-				_encoding.GetBytes(chrPtr, data.Length, PositionPtr, length);
-
-				Position += length;
+				Position += count;
+				Write((byte)0);
 			}
 		}
 
@@ -208,6 +244,17 @@ namespace UMemory.Unmanaged.Stream.Core
 
 			CopyFrom(data, 0, Position, (uint)length);
 			Position += length;
+		}
+
+		/// <summary>
+		/// Writes byte array value to current stream position with specified elements count.
+		/// </summary>
+		/// <param name="data">Byte array value to write.</param>
+		/// <param name="count">Elements count to write.</param>
+		public void Write(byte[] data, int count)
+		{
+			CopyFrom(data, 0, Position, (uint)count);
+			Position += count;
 		}
 
 		/// <summary>
@@ -370,10 +417,28 @@ namespace UMemory.Unmanaged.Stream.Core
 			int length = Read7BitEncodedInt();
 
 			if (!CanSeek(length))
-				throw new ArgumentOutOfRangeException();
+				throw new IndexOutOfRangeException();
 
 			string retVal = _encoding.GetString(PositionPtr, length);
 			Position += length;
+
+			return retVal;
+		}
+
+		/// <summary>
+		/// Reads null terminated string value on current stream position.
+		/// </summary>
+		/// <returns>Read string value.</returns>
+		public string ReadCString()
+		{
+			int count = Seek((byte)0);
+
+			if (!CanSeek(count))
+				throw new IndexOutOfRangeException();
+
+			string retVal = _encoding.GetString(PositionPtr, count);
+			Position += count;
+			ReadByte();
 
 			return retVal;
 		}
@@ -383,16 +448,23 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// Byte array length is prefixed with 7bit encoded int.
 		/// </summary>
 		/// <returns>Read byte array value.</returns>
-		public byte[] ReadByteArray()
+		public byte[] ReadBytes()
 		{
 			int length = Read7BitEncodedInt();
+			return ReadBytes(length);
+		}
 
-			if (!CanSeek(length))
-				throw new ArgumentOutOfRangeException();
+		/// <summary>
+		/// Reads byte array value on current stream position with given elements count.
+		/// </summary>
+		/// <param name="count">Array elements count.</param>
+		/// <returns>Read byte array value.</returns>
+		public byte[] ReadBytes(int count)
+		{
+			byte[] retVal = new byte[count];
 
-			byte[] retVal = new byte[length];
-			CopyTo(Position, retVal, 0, (uint)length);
-			Position += length;
+			CopyTo(Position, retVal, 0, (uint)count);
+			Position += count;
 
 			return retVal;
 		}
