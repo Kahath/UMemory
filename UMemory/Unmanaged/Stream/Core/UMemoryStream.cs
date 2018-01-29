@@ -183,21 +183,42 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// Writes string value to current stream position with prefixed length as 7bit encoded int.
 		/// Increases stream position.
 		/// </summary>
-		/// <param name="data">string value to write.</param>
+		/// <param name="data">String value to write.</param>
 		public void Write(string data)
 		{
 			fixed (char* chrPtr = data)
 			{
 				int length = _encoding.GetByteCount(data);
-
-				if (!CanSeek(length + 1))
-					throw new IndexOutOfRangeException();
-
 				Write7BitEncodedInt(length);
 
 				_encoding.GetBytes(chrPtr, data.Length, PositionPtr, length);
 
 				Position += length;
+			}
+		}
+
+		/// <summary>
+		/// Writes null terminated string value to current stream position.
+		/// Increases stream position
+		/// </summary>
+		/// <param name="data">String value to write.</param>
+		public void WriteCString(string data)
+		{
+			if (String.IsNullOrEmpty(data))
+			{
+				Write((byte)0);
+			}
+			else
+			{
+				fixed (char* chrPtr = data)
+				{
+					int length = _encoding.GetByteCount(data);
+					_encoding.GetBytes(chrPtr, data.Length, PositionPtr, length);
+
+					Position += length;
+
+					Write((byte)0);
+				}
 			}
 		}
 
@@ -213,6 +234,17 @@ namespace UMemory.Unmanaged.Stream.Core
 
 			CopyFrom(data, 0, Position, (uint)length);
 			Position += length;
+		}
+
+		/// <summary>
+		/// Writes byte array value to current stream position with specified elements count.
+		/// </summary>
+		/// <param name="data">Byte array value to write.</param>
+		/// <param name="count">Elements count to write.</param>
+		public void Write(byte[] data, int count)
+		{
+			CopyFrom(data, 0, Position, (uint)count);
+			Position += count;
 		}
 
 		/// <summary>
@@ -384,11 +416,25 @@ namespace UMemory.Unmanaged.Stream.Core
 		}
 
 		/// <summary>
+		/// Reads null terminated string value on current stream position.
+		/// </summary>
+		/// <returns>Read string value.</returns>
+		public string ReadCString()
+		{
+			int length = Seek((byte)0);
+
+			string retVal = _encoding.GetString(PositionPtr, length);
+			Skip(1);
+
+			return retVal;
+		}
+
+		/// <summary>
 		/// Reads byte array value on current stream position.
 		/// Byte array length is prefixed with 7bit encoded int.
 		/// </summary>
 		/// <returns>Read byte array value.</returns>
-		public byte[] ReadByteArray()
+		public byte[] ReadBytes()
 		{
 			int length = Read7BitEncodedInt();
 
@@ -398,6 +444,18 @@ namespace UMemory.Unmanaged.Stream.Core
 			byte[] retVal = new byte[length];
 			CopyTo(Position, retVal, 0, (uint)length);
 			Position += length;
+
+			return retVal;
+		}
+
+		public byte[] ReadBytes(int count)
+		{
+			if (!CanSeek(count))
+				throw new ArgumentOutOfRangeException();
+
+			byte[] retVal = new byte[count];
+			CopyTo(Position, retVal, 0, (uint)count);
+			Position += count;
 
 			return retVal;
 		}
