@@ -9,251 +9,447 @@ namespace UMemory.Test
 	[TestClass]
 	public class UMemoryTests
 	{
+		#region Basic
+
 		[TestMethod]
-		public void TestSignedPositions()
+		public void NewUMemoryStreamTest()
+		{
+			TestStream stream = new TestStream(0, EndiannessType.LittleEndian);
+			Assert.AreEqual(0, stream.Capacity);
+			Assert.AreEqual(0, stream.Position);
+			Assert.AreEqual(EndiannessType.LittleEndian, stream.EndianessType);
+		}
+
+		[TestMethod]
+		public void AllocTest()
+		{
+			TestStream stream = new TestStream(0, EndiannessType.LittleEndian);
+			stream.Alloc(15);
+
+			Assert.AreEqual(15, stream.Capacity);
+		}
+
+		[TestMethod]
+		public void ReAllocTest()
 		{
 			TestStream stream = new TestStream(15, EndiannessType.LittleEndian);
+			stream.Alloc(2);
 
-			stream.Write((sbyte)1);
-			Assert.IsTrue(stream.Position == 1);
-
-			stream.Write((short)45);
-			Assert.IsTrue(stream.Position == 3);
-
-			stream.Write(54);
-			Assert.IsTrue(stream.Position == 7);
-
-			stream.Write((long)4893);
-			Assert.IsTrue(stream.Position == 15);
+			Assert.AreEqual(2, stream.Capacity);
 		}
 
 		[TestMethod]
-		public void TestUnsignedositions()
-		{
-			TestStream stream = new TestStream(17, EndiannessType.LittleEndian);
-
-			stream.Write((byte)1);
-			Assert.IsTrue(stream.Position == 1);
-
-			stream.Write((char)12);
-			Assert.IsTrue(stream.Position == 3);
-
-			stream.Write((ushort)45);
-			Assert.IsTrue(stream.Position == 5);
-
-			stream.Write((uint)54);
-			Assert.IsTrue(stream.Position == 9);
-
-			stream.Write((ulong)4893);
-			Assert.IsTrue(stream.Position == 17);
-		}
-
-		[TestMethod]
-		public void TestFloatingPointPositions()
-		{
-			TestStream stream = new TestStream(12, EndiannessType.LittleEndian);
-
-			stream.Write(435.62F);
-			Assert.IsTrue(stream.Position == 4);
-
-			stream.Write(4893.4523432D);
-			Assert.IsTrue(stream.Position == 12);
-		}
-
-		[TestMethod]
-		public void TestStringPositions()
-		{
-			TestStream stream = new TestStream(34, EndiannessType.LittleEndian);
-
-			stream.Write("Test string position");
-			Assert.IsTrue(stream.Position == 21);
-
-			stream.WriteCString("Test CString");
-			Assert.IsTrue(stream.Position == 34);
-		}
-
-		[TestMethod]
-		public void TestArrayPositions()
+		public void FreeTest()
 		{
 			TestStream stream = new TestStream(15, EndiannessType.LittleEndian);
+			stream.Free();
 
-			byte[] testArray = new byte[10];
-			byte[] testCountArray = new byte[10];
-
-			stream.Write(testArray);
-			Assert.IsTrue(stream.Position == 11);
-
-			stream.Write(testCountArray, 4);
-			Assert.IsTrue(stream.Position == 15);
+			Assert.AreEqual(0, stream.Capacity);
 		}
 
 		[TestMethod]
 		[ExpectedException(typeof(IndexOutOfRangeException))]
-		public void TestStringWriteIndexOutOfRange()
+		public void IndexOutOfRangeTest()
 		{
-			TestStream stream = new TestStream(12, EndiannessType.LittleEndian);
-
-			stream.Write("This string is longer than 12 chars");
+			TestStream stream = new TestStream(0, EndiannessType.LittleEndian);
+			stream.Seek(1);
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(IndexOutOfRangeException))]
-		public void TestArrayWriteIndexOutOfRange()
+		public void SeekTest()
 		{
-			TestStream stream = new TestStream(12, EndiannessType.LittleEndian);
-			byte[] testLongerArray = new byte[12];
-
-			stream.Write(testLongerArray);
-		}
-
-		[TestMethod]
-		[ExpectedException(typeof(IndexOutOfRangeException))]
-		public void TestWriteIndexOutOfRange()
-		{
-			TestStream stream = new TestStream(12, EndiannessType.LittleEndian);
-
-			stream.Write((sbyte)1);
-			stream.Write((short)45);
-			stream.Write(54);
-			stream.Write((long)4893);
-		}
-
-		[TestMethod]
-		public void TestReadSigned()
-		{
-			TestStream stream = new TestStream(15, EndiannessType.LittleEndian);
-
-			stream.Write((sbyte)1);
-			stream.Write((short)45);
-			stream.Write(54);
-			stream.Write((long)4893);
-
-			stream.Seek(0);
-
-			Assert.IsTrue(stream.ReadSByte() == 1);
-			Assert.IsTrue(stream.ReadInt16() == 45);
-			Assert.IsTrue(stream.ReadInt32() == 54);
-			Assert.IsTrue(stream.ReadInt64() == 4893);
-		}
-
-		[TestMethod]
-		public void TestReadUnsigned()
-		{
-			TestStream stream = new TestStream(17, EndiannessType.LittleEndian);
-
-			stream.Write((byte)1);
-			stream.Write((char)12);
-			stream.Write((ushort)45);
-			stream.Write((uint)54);
-			stream.Write((ulong)4893);
-
-			stream.Seek(0);
-
-			Assert.IsTrue(stream.ReadByte() == 1);
-			Assert.IsTrue(stream.ReadChar() == 12);
-			Assert.IsTrue(stream.ReadUInt16() == 45);
-			Assert.IsTrue(stream.ReadUInt32() == 54);
-			Assert.IsTrue(stream.ReadUInt64() == 4893);
-		}
-
-		[TestMethod]
-		public void TestReadFloatingPoint()
-		{
-			TestStream stream = new TestStream(12, EndiannessType.LittleEndian);
-
-			stream.Write(435.62F);
-			stream.Write(4893.4523432D);
-
-			stream.Seek(0);
-
-			Assert.IsTrue(stream.ReadFloat() == 435.62F);
-			Assert.IsTrue(stream.ReadDouble() == 4893.4523432D);
-		}
-
-		[TestMethod]
-		public void TestReadString()
-		{
-			TestStream stream = new TestStream(34, EndiannessType.LittleEndian);
-
-			stream.Write("Test string position");
-			stream.WriteCString("Test CString");
-
-			stream.Seek(0);
-
-			Assert.IsTrue(stream.ReadString() == "Test string position");
-			Assert.IsTrue(stream.ReadCString() == "Test CString");
-
-		}
-
-		[TestMethod]
-		public void TestReadArray()
-		{
-			TestStream stream = new TestStream(15, EndiannessType.LittleEndian);
-
-			byte[] testArray = new byte[10] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-			byte[] testCountArray = new byte[10] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
-
-			stream.Write(testArray);
-			stream.Write(testCountArray, 4);
-
-			stream.Seek(0);
-
-			byte[] readArray = stream.ReadBytes();
-			for (int i = 0; i < 10; i++)
-				Assert.IsTrue(readArray[i] == (byte)(i + 1));
-
-			byte[] readCountArray = stream.ReadBytes(4);
-			Assert.IsTrue(readCountArray[0] == 10);
-			Assert.IsTrue(readCountArray[1] == 9);
-			Assert.IsTrue(readCountArray[2] == 8);
-			Assert.IsTrue(readCountArray[3] == 7);
-		}
-
-		[TestMethod]
-		[ExpectedException(typeof(IndexOutOfRangeException))]
-		public void TestStringReadndexOutOfRange()
-		{
-			TestStream stream = new TestStream(28, EndiannessType.LittleEndian);
-
-			stream.Write("This string is 28 chars long");
-			Assert.IsTrue(stream.Position == 29);
+			TestStream stream = new TestStream(1, EndiannessType.LittleEndian);
 
 			stream.Seek(1);
-			stream.ReadString();
+			Assert.AreEqual(1, stream.Position);
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(IndexOutOfRangeException))]
-		public void TestArrayReadIndexOutOfRange()
+		public void SeekValueTest()
 		{
-			TestStream stream = new TestStream(12, EndiannessType.LittleEndian);
-			byte[] testLongerArray = new byte[11];
+			TestStream stream = new TestStream(5, EndiannessType.LittleEndian);
+			stream.WriteUInt8(1);
+			stream.WriteUInt8(2);
+			stream.WriteUInt8(3);
+			stream.WriteUInt8(4);
+			stream.WriteUInt8(5);
 
-			stream.Write(testLongerArray);
-			Assert.IsTrue(stream.Position == 12);
-
-			stream.Seek(2);
-			stream.ReadBytes(11);
+			stream.Seek(0);
+			Assert.AreEqual(2, stream.SeekValue(3));
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(IndexOutOfRangeException))]
-		public void TestReadIndexOutOfRange()
+		public void CanSeekTest()
+		{
+			TestStream stream = new TestStream(5, EndiannessType.LittleEndian);
+
+			Assert.IsTrue(stream.CanSeek(3));
+			Assert.IsTrue(stream.CanSeek(5));
+			Assert.IsTrue(!stream.CanSeek(6));
+		}
+
+		#endregion
+
+		#region I/O
+
+		[TestMethod]
+		public void BoolTest()
+		{
+			TestStream stream = new TestStream(1, EndiannessType.LittleEndian);
+			stream.WriteBool(true);
+
+			Assert.AreEqual(1, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(true, stream.ReadBool());
+			Assert.AreEqual(1, stream.Position);
+		}
+
+		[TestMethod]
+		public void Int8Test()
+		{
+			TestStream stream = new TestStream(1, EndiannessType.LittleEndian);
+			stream.WriteInt8(1);
+
+			Assert.AreEqual(1, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1, stream.ReadInt8());
+			Assert.AreEqual(1, stream.Position);
+		}
+
+		[TestMethod]
+		public void UInt8Test()
+		{
+			TestStream stream = new TestStream(1, EndiannessType.LittleEndian);
+			stream.WriteUInt8(1);
+
+			Assert.AreEqual(1, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1, stream.ReadUInt8());
+			Assert.AreEqual(1, stream.Position);
+		}
+
+		[TestMethod]
+		public void Int16Test()
+		{
+			TestStream stream = new TestStream(2, EndiannessType.LittleEndian);
+			stream.WriteInt16(1);
+
+			Assert.AreEqual(2, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1, stream.ReadInt16());
+			Assert.AreEqual(2, stream.Position);
+		}
+
+		[TestMethod]
+		public void UInt16Test()
+		{
+			TestStream stream = new TestStream(2, EndiannessType.LittleEndian);
+			stream.WriteUInt16(1);
+
+			Assert.AreEqual(2, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1, stream.ReadUInt16());
+			Assert.AreEqual(2, stream.Position);
+		}
+
+		[TestMethod]
+		public void Int32Test()
+		{
+			TestStream stream = new TestStream(4, EndiannessType.LittleEndian);
+			stream.WriteInt32(1);
+
+			Assert.AreEqual(4, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1, stream.ReadInt32());
+			Assert.AreEqual(4, stream.Position);
+		}
+
+		[TestMethod]
+		public void UInt32Test()
+		{
+			TestStream stream = new TestStream(4, EndiannessType.LittleEndian);
+			stream.WriteUInt32(1);
+
+			Assert.AreEqual(4, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual((uint)1, stream.ReadUInt32());
+			Assert.AreEqual(4, stream.Position);
+		}
+
+		[TestMethod]
+		public void Int64Test()
+		{
+			TestStream stream = new TestStream(8, EndiannessType.LittleEndian);
+			stream.WriteInt64(1);
+
+			Assert.AreEqual(8, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1, stream.ReadInt64());
+			Assert.AreEqual(8, stream.Position);
+		}
+
+		[TestMethod]
+		public void UInt64Test()
+		{
+			TestStream stream = new TestStream(8, EndiannessType.LittleEndian);
+			stream.WriteUInt64(1);
+
+			Assert.AreEqual(8, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual((ulong)1, stream.ReadUInt64());
+			Assert.AreEqual(8, stream.Position);
+		}
+
+		[TestMethod]
+		public void FloatTest()
+		{
+			TestStream stream = new TestStream(4, EndiannessType.LittleEndian);
+			stream.WriteFloat(1.435F);
+
+			Assert.AreEqual(4, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1.435F, stream.ReadFloat());
+			Assert.AreEqual(4, stream.Position);
+		}
+
+		[TestMethod]
+		public void DoubleTest()
+		{
+			TestStream stream = new TestStream(8, EndiannessType.LittleEndian);
+			stream.WriteDouble(1.4456346534D);
+
+			Assert.AreEqual(8, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1.4456346534D, stream.ReadDouble());
+			Assert.AreEqual(8, stream.Position);
+		}
+
+		[TestMethod]
+		public void StringTest()
 		{
 			TestStream stream = new TestStream(15, EndiannessType.LittleEndian);
 
-			stream.Write((sbyte)1);
-			stream.Write((short)45);
-			stream.Write(54);
-			stream.Write((long)4893);
-			Assert.IsTrue(stream.Position == 15);
+			stream.WriteString("Sample string");
+			Assert.AreEqual(14, stream.Position);
 
-			stream.Seek(1);
-			stream.ReadSByte();
-			stream.ReadInt16();
-			stream.ReadInt32();
-			stream.ReadInt64();
+			stream.WriteString("");
+			Assert.AreEqual(15, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual("Sample string", stream.ReadString());
+			Assert.AreEqual(14, stream.Position);
+
+			Assert.AreEqual("", stream.ReadString());
+			Assert.AreEqual(15, stream.Position);
 		}
+
+		[TestMethod]
+		public void StringExceptionTest()
+		{
+			TestStream stream = new TestStream(15, EndiannessType.LittleEndian);
+
+			Assert.ThrowsException<IndexOutOfRangeException>(() => stream.WriteString("Sample string longer than 15 chars"));
+
+			stream.WriteUInt8(16);
+			stream.Seek(0);
+
+			Assert.ThrowsException<IndexOutOfRangeException>(() => stream.ReadString());
+		}
+
+		[TestMethod]
+		public void CStringTest()
+		{
+			TestStream stream = new TestStream(15, EndiannessType.LittleEndian);
+
+			stream.WriteCString("Sample string");
+			Assert.AreEqual(14, stream.Position);
+
+			stream.WriteCString("");
+			Assert.AreEqual(15, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual("Sample string", stream.ReadCString());
+			Assert.AreEqual(14, stream.Position);
+
+			Assert.AreEqual("", stream.ReadCString());
+			Assert.AreEqual(15, stream.Position);
+		}
+
+		[TestMethod]
+		public void CStringExceptionTest()
+		{
+			TestStream stream = new TestStream(15, EndiannessType.LittleEndian);
+
+			Assert.ThrowsException<IndexOutOfRangeException>(() => stream.WriteCString("Sample string longer than 15 chars"));
+
+			// There shouldn't be null termination in first 15 bytes.
+			stream.WriteString("Sample string1");
+			stream.Seek(0);
+
+			Assert.ThrowsException<IndexOutOfRangeException>(() => stream.ReadCString());
+		}
+
+		[TestMethod]
+		public void BytesTest()
+		{
+			TestStream stream = new TestStream(18, EndiannessType.LittleEndian);
+			byte[] sampleBytes = new byte[9] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+			stream.WriteBytes(sampleBytes);
+			Assert.AreEqual(10, stream.Position);
+
+			stream.WriteBytes(sampleBytes, 4);
+			Assert.AreEqual(15, stream.Position);
+
+			// Length is not written here
+			stream.WriteBytes(sampleBytes, 7, 2);
+			Assert.AreEqual(17, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(9, stream.ReadBytes().Length);
+			Assert.AreEqual(10, stream.Position);
+
+			Assert.AreEqual(4, stream.ReadBytes().Length);
+			Assert.AreEqual(15, stream.Position);
+
+			Assert.AreEqual(2, stream.ReadBytes(2).Length);
+			Assert.AreEqual(17, stream.Position);
+		}
+
+		[TestMethod]
+		public void BytesExceptionTest()
+		{
+			TestStream stream = new TestStream(10, EndiannessType.LittleEndian);
+			byte[] sampleBytes = new byte[16] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+
+			Assert.ThrowsException<IndexOutOfRangeException>(() => stream.WriteBytes(sampleBytes));
+			Assert.ThrowsException<IndexOutOfRangeException>(() => stream.WriteBytes(sampleBytes, 10));
+			Assert.ThrowsException<IndexOutOfRangeException>(() => stream.WriteBytes(sampleBytes, 0, 11));
+
+			stream.WriteBytes(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+
+			Assert.ThrowsException<IndexOutOfRangeException>(() => stream.ReadBytes(11));
+		}
+
+		[TestMethod]
+		public void CustomTest()
+		{
+			TestStream stream = new TestStream(21, EndiannessType.LittleEndian);
+			TestSample sample = new TestSample();
+			stream.Write(sample);
+
+			Assert.AreEqual(21, stream.Position);
+
+			stream.Seek(0);
+			sample.ChangeData();
+
+			stream.Read(sample);
+
+			Assert.AreEqual(1, sample.SampleByte);
+			Assert.AreEqual(2, sample.SampleShort);
+			Assert.AreEqual(5, sample.SampleInt);
+			Assert.AreEqual("Sample string", sample.SampleString);
+
+			Assert.AreEqual(21, stream.Position);
+		}
+
+		#endregion
+
+		#region Endianness
+
+		[TestMethod]
+		public void EndiannessTest()
+		{
+			TestStream littleEndianStream = new TestStream(8, EndiannessType.LittleEndian);
+			short sampleShort = 0x1234;
+			int sampleInt = 0x12345678;
+			long sampleLong = 0x1234567891234567;
+
+			littleEndianStream.WriteInt16(sampleShort);
+			littleEndianStream.Seek(0);
+
+			Assert.AreEqual(0x34, littleEndianStream.ReadUInt8());
+			Assert.AreEqual(0x12, littleEndianStream.ReadUInt8());
+
+			littleEndianStream.Seek(0);
+			littleEndianStream.WriteInt32(sampleInt);
+			littleEndianStream.Seek(0);
+
+			Assert.AreEqual(0x78, littleEndianStream.ReadUInt8());
+			Assert.AreEqual(0x56, littleEndianStream.ReadUInt8());
+			Assert.AreEqual(0x34, littleEndianStream.ReadUInt8());
+			Assert.AreEqual(0x12, littleEndianStream.ReadUInt8());
+
+			littleEndianStream.Seek(0);
+			littleEndianStream.WriteInt64(sampleLong);
+			littleEndianStream.Seek(0);
+
+			Assert.AreEqual(0x67, littleEndianStream.ReadUInt8());
+			Assert.AreEqual(0x45, littleEndianStream.ReadUInt8());
+			Assert.AreEqual(0x23, littleEndianStream.ReadUInt8());
+			Assert.AreEqual(0x91, littleEndianStream.ReadUInt8());
+			Assert.AreEqual(0x78, littleEndianStream.ReadUInt8());
+			Assert.AreEqual(0x56, littleEndianStream.ReadUInt8());
+			Assert.AreEqual(0x34, littleEndianStream.ReadUInt8());
+			Assert.AreEqual(0x12, littleEndianStream.ReadUInt8());
+
+			TestStream bigEndianStream = new TestStream(8, EndiannessType.BigEndian);
+
+			bigEndianStream.WriteInt16(sampleShort);
+			bigEndianStream.Seek(0);
+
+			Assert.AreEqual(0x12, bigEndianStream.ReadUInt8());
+			Assert.AreEqual(0x34, bigEndianStream.ReadUInt8());
+
+			bigEndianStream.Seek(0);
+			bigEndianStream.WriteInt32(sampleInt);
+			bigEndianStream.Seek(0);
+
+			Assert.AreEqual(0x12, bigEndianStream.ReadUInt8());
+			Assert.AreEqual(0x34, bigEndianStream.ReadUInt8());
+			Assert.AreEqual(0x56, bigEndianStream.ReadUInt8());
+			Assert.AreEqual(0x78, bigEndianStream.ReadUInt8());
+
+			bigEndianStream.Seek(0);
+			bigEndianStream.WriteInt64(sampleLong);
+			bigEndianStream.Seek(0);
+
+			Assert.AreEqual(0x12, bigEndianStream.ReadUInt8());
+			Assert.AreEqual(0x34, bigEndianStream.ReadUInt8());
+			Assert.AreEqual(0x56, bigEndianStream.ReadUInt8());
+			Assert.AreEqual(0x78, bigEndianStream.ReadUInt8());
+			Assert.AreEqual(0x91, bigEndianStream.ReadUInt8());
+			Assert.AreEqual(0x23, bigEndianStream.ReadUInt8());
+			Assert.AreEqual(0x45, bigEndianStream.ReadUInt8());
+			Assert.AreEqual(0x67, bigEndianStream.ReadUInt8());
+		}
+
+		#endregion
 
 		[TestMethod]
 		public void TestGeneralReadWrite()
@@ -269,28 +465,28 @@ namespace UMemory.Test
 			{
 				int add = iterationBytes * i;
 
-				testStream.Write(true);
+				testStream.WriteBool(true);
 				Assert.IsTrue(testStream.Position == 1 + add);
 
-				testStream.Write((short)10);
+				testStream.WriteInt16(10);
 				Assert.IsTrue(testStream.Position == 3 + add);
 
-				testStream.Write(25);
+				testStream.WriteInt32(25);
 				Assert.IsTrue(testStream.Position == 7 + add);
 
-				testStream.Write("Sample string");
+				testStream.WriteString("Sample string");
 				Assert.IsTrue(testStream.Position == 21 + add);
 
-				testStream.Write(2598D);
+				testStream.WriteDouble(2598D);
 				Assert.IsTrue(testStream.Position == 29 + add);
 
-				testStream.Write(2598.34253752D);
+				testStream.WriteDouble(2598.34253752D);
 				Assert.IsTrue(testStream.Position == 37 + add);
 
-				testStream.Write(2598.435F);
+				testStream.WriteFloat(2598.435F);
 				Assert.IsTrue(testStream.Position == 41 + add);
 
-				testStream.Write(testArray);
+				testStream.WriteBytes(testArray);
 				Assert.IsTrue(testStream.Position == 50 + add);
 
 				testStream.WriteCString("CString10");
@@ -305,7 +501,7 @@ namespace UMemory.Test
 			{
 				int add = iterationBytes * i;
 
-				Assert.IsTrue(testStream.ReadBoolean() == true);
+				Assert.IsTrue(testStream.ReadBool() == true);
 				Assert.IsTrue(testStream.Position == 1 + add);
 
 				Assert.IsTrue(testStream.ReadInt16() == 10);
@@ -338,7 +534,7 @@ namespace UMemory.Test
 
 #if !DEBUG
 		[TestMethod]
-		public void TestSpeed()
+		public void TestPerformance()
 		{
 			const int iterations = 500;
 			const int allocateBytes = iterations * 50;
@@ -395,14 +591,14 @@ namespace UMemory.Test
 			sw.Restart();
 			for (int j = 0; j < iterations; j++)
 			{
-				testStream.Write(true);
-				testStream.Write((short)10);
-				testStream.Write(25);
-				testStream.Write("Sample string");
-				testStream.Write(2598D);
-				testStream.Write(2598.34253752D);
-				testStream.Write(2598.435F);
-				testStream.Write(testArray);
+				testStream.WriteBool(true);
+				testStream.WriteInt16(10);
+				testStream.WriteInt32(25);
+				testStream.WriteString("Sample string");
+				testStream.WriteDouble(2598D);
+				testStream.WriteDouble(2598.34253752D);
+				testStream.WriteFloat(2598.435F);
+				testStream.WriteBytes(testArray);
 			}
 			sw.Stop();
 
@@ -412,7 +608,7 @@ namespace UMemory.Test
 			sw.Restart();
 			for (int j = 0; j < iterations; j++)
 			{
-				testStream.ReadBoolean();
+				testStream.ReadBool();
 				testStream.ReadInt16();
 				testStream.ReadInt32();
 				testStream.ReadString();
@@ -424,6 +620,12 @@ namespace UMemory.Test
 			sw.Stop();
 
 			umReadElapsedTicks = sw.ElapsedTicks;
+
+			Trace.WriteLine($"MS write { msWriteElapsedTicks}");
+			Trace.WriteLine($"UM write { umWriteElapsedTicks}");
+
+			Trace.WriteLine($"MS read { msReadElapsedTicks}");
+			Trace.WriteLine($"UM read { umReadElapsedTicks}");
 
 			Assert.IsTrue(umWriteElapsedTicks < msWriteElapsedTicks);
 			Assert.IsTrue(umReadElapsedTicks < msReadElapsedTicks);

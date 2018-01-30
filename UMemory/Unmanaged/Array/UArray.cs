@@ -170,6 +170,10 @@ namespace UMemory.Unmanaged.Array
 			Alloc(capacity);
 		}
 
+		/// <summary>
+		/// Destructor.
+		/// Frees allocated memory.
+		/// </summary>
 		~UArray()
 		{
 			Free();
@@ -222,6 +226,7 @@ namespace UMemory.Unmanaged.Array
 			{
 				Marshal.FreeHGlobal((IntPtr)_arrayPtr);
 				_arrayPtr = null;
+				_length = 0;
 			}
 		}
 

@@ -11,6 +11,11 @@ using UMemory.Unmanaged.Enums;
 
 namespace UMemory.Unmanaged.Stream.Base
 {
+	/// <summary>
+	/// Provides basic I/O operations on top of unmanaged array.
+	/// Manages current position of stream.
+	/// I/O depends of endianness type.
+	/// </summary>
 	[SecurityCritical]
 	[ComVisible(false)]
 	public abstract unsafe class UStream
@@ -138,7 +143,7 @@ namespace UMemory.Unmanaged.Stream.Base
 		public void Seek(int offset)
 		{
 			if (!CanSeek(offset))
-				throw new ArgumentOutOfRangeException();
+				throw new IndexOutOfRangeException();
 
 			_position = offset;
 		}
@@ -148,7 +153,7 @@ namespace UMemory.Unmanaged.Stream.Base
 		/// </summary>
 		/// <param name="value">Byte value to seek.</param>
 		/// <returns>Number of elements to seek value.</returns>
-		public int Seek(byte value)
+		public int SeekValue(byte value)
 		{
 			byte* positionPtr = PositionPtr;
 			int count = 0;
@@ -184,164 +189,169 @@ namespace UMemory.Unmanaged.Stream.Base
 
 		#endregion
 
-		#region WriteOnPtr
+		#region Write
 
 		/// <summary>
 		/// Writes boolean value to the underlying array.
 		/// </summary>
-		/// <param name="positionPtr">Pointer to where data should be written.</param>
 		/// <param name="data">Boolean value to write.</param>
-		/// <returns>Size of the written value.</returns>
-		protected internal void WriteOnPtr(byte* positionPtr, bool data)
+		public void WriteBool(bool data)
 		{
-			WriteInt8(positionPtr, data ? (byte)1 : (byte)0);
+			WriteInt8OnPtr(PositionPtr, data ? (byte)1 : (byte)0);
+			_position += 1;
 		}
 
 		/// <summary>
 		/// Writes byte value to the underlying array.
 		/// </summary>
-		/// <param name="positionPtr">Pointer to where data should be written.</param>
 		/// <param name="data">Byte value to write.</param>
-		/// <returns>Size of the written value.</returns>
-		protected internal void WriteOnPtr(byte* positionPtr, byte data)
+		public void WriteUInt8(byte data)
 		{
-			WriteInt8(positionPtr, data);
+			WriteInt8OnPtr(PositionPtr, data);
+			_position += 1;
 		}
 
 		/// <summary>
-		/// Writes unsigned int value to the underlying array.
+		/// Writes unsigned 16bit integer value to underlying array.
 		/// </summary>
-		/// <param name="positionPtr">Pointer to where data should be written.</param>
+		/// <param name="data">Ushort value to write.</param>
+		public void WriteUInt16(ushort data)
+		{
+			WriteInt16OnPtr(PositionPtr, (short)data);
+			_position += 2;
+		}
+
+
+		/// <summary>
+		/// Writes unsigned 32 bit integer value to the underlying array.
+		/// </summary>
 		/// <param name="data">Uint value to write.</param>
-		/// <returns>Size of the written value.</returns>
-		protected internal void WriteOnPtr(byte* positionPtr, uint data)
+		public void WriteUInt32(uint data)
 		{
-			WriteInt32(positionPtr, (int)data);
+			WriteInt32OnPtr(PositionPtr, (int)data);
+			_position += 4;
 		}
 
 		/// <summary>
-		/// Writes unsigned long value to the underlying array.
+		/// Writes unsigned 64 bit integer value to the underlying array.
 		/// </summary>
-		/// <param name="positionPtr">Pointer to where data should be written.</param>
 		/// <param name="data">Ulong value to write.</param>
-		/// <returns>Size of the written value.</returns>
-		protected internal void WriteOnPtr(byte* positionPtr, ulong data)
+		public void WriteUInt64(ulong data)
 		{
-			WriteInt64(positionPtr, (long)data);
+			WriteInt64OnPtr(PositionPtr, (long)data);
+			_position += 8;
 		}
 
 		/// <summary>
-		/// Writes unsigned short value to the underlying array.
+		/// Writes signed 8 bit integer value to the underlying array.
 		/// </summary>
-		/// <param name="positionPtr">Pointer to where data should be written.</param>
-		/// <param name="data">Ushort value to write</param>
-		/// <returns>Size of the written value</returns>
-		protected internal void WriteOnPtr(byte* positionPtr, ushort data)
-		{
-			WriteInt16(positionPtr, (short)data);
-		}
-
-		/// <summary>
-		/// Writes signed byte value to the underlying array.
-		/// </summary>
-		/// <param name="positionPtr">Pointer to where data should be written.</param>
 		/// <param name="data">Sbyte value to write.</param>
-		/// <returns>Size of the written value.</returns>
-		protected internal void WriteOnPtr(byte* positionPtr, sbyte data)
+		public void WriteInt8(sbyte data)
 		{
-			WriteInt8(positionPtr, (byte)data);
+			WriteInt8OnPtr(PositionPtr, (byte)data);
+			_position += 1;
 		}
+
+		/// <summary>
+		/// Writes 16 bit integer value to the underlying array.
+		/// </summary>
+		/// <param name="data">Ushort value to write</param>
+		public void WriteInt16(short data)
+		{
+			WriteInt16OnPtr(PositionPtr, data);
+			_position += 2;
+		}
+
 
 		/// <summary>
 		/// Writes char value to the underlying array.
 		/// </summary>
-		/// <param name="positionPtr">Pointer to where data should be written.</param>
 		/// <param name="data">Char value to write.</param>
-		/// <returns>Size of the written value.</returns>
-		protected internal void WriteOnPtr(byte* positionPtr, char data)
+		public void WriteChar(char data)
 		{
-			WriteInt16(positionPtr, (short)data);
+			WriteInt16OnPtr(PositionPtr, (short)data);
+			_position += 2;
 		}
 
 		/// <summary>
-		/// Writes short value to the underlying array.
+		/// Writes 32 bit integer value to the underlying array.
 		/// </summary>
-		/// <param name="positionPtr">Pointer to where data should be written.</param>
-		/// <param name="data">Short value to write.</param>
-		/// <returns>Size of the written value.</returns>
-		protected internal void WriteOnPtr(byte* positionPtr, short data)
-		{
-			WriteInt16(positionPtr, data);
-		}
-
-		/// <summary>
-		/// Writes int value to the underlying array.
-		/// </summary>
-		/// <param name="positionPtr">Pointer to where data should be written.</param>
 		/// <param name="data">Int value to write.</param>
-		/// <returns>Size of the written value</returns>
-		protected internal void WriteOnPtr(byte* positionPtr, int data)
+		public void WriteInt32(int data)
 		{
-			WriteInt32(positionPtr, data);
+			WriteInt32OnPtr(PositionPtr, data);
+			_position += 4;
 		}
 
 		/// <summary>
-		/// Writes long value to the underlying array.
+		/// Writes 64 bit integer value to the underlying array.
 		/// </summary>
-		/// <param name="positionPtr">Pointer to where data should be written.</param>
 		/// <param name="data">Long data to write.</param>
-		/// <returns>Size of the written value.</returns>
-		protected internal void WriteOnPtr(byte* positionPtr, long data)
+		public void WriteInt64(long data)
 		{
-			WriteInt64(positionPtr, data);
+			WriteInt64OnPtr(PositionPtr, data);
+			_position += 8;
 		}
 
 		/// <summary>
-		/// Writes float value to the underlying array.
+		/// Writes 32 bit floating point value to the underlying array.
 		/// </summary>
-		/// <param name="positionPtr">Pointer to where data should be written.</param>
 		/// <param name="data">Float value to write.</param>
-		/// <returns>Size of the written value.</returns>
-		protected internal void WriteOnPtr(byte* positionPtr, float data)
+		public void WriteFloat(float data)
 		{
-			WriteInt32(positionPtr, *(int*)&data);
+			WriteInt32OnPtr(PositionPtr, *(int*)&data);
+			_position += 4;
 		}
 
 		/// <summary>
-		/// Writes double value to the underlying array.
+		/// Writes 64 bit floating point value to the underlying array.
 		/// </summary>
-		/// <param name="positionPtr">Pointer to where data should be written.</param>
 		/// <param name="data">Double value to write</param>
-		/// <returns>Size of the written value</returns>
-		protected internal void WriteOnPtr(byte* positionPtr, double data)
+		public void WriteDouble(double data)
 		{
-			WriteInt64(positionPtr, *(long*)&data);
+			WriteInt64OnPtr(PositionPtr, *(long*)&data);
+			_position += 8;
+		}
+
+		/// <summary>
+		/// Writes byte array to underlying array on current stream position.
+		/// </summary>
+		/// <param name="data">Byte array to write.</param>
+		/// <param name="offset">Byte array offset.</param>
+		/// <param name="count">Number of bytes to write from array.</param>
+		public void WriteBytes(byte[] data, int offset, int count)
+		{
+			if (!CanSeek(count))
+				throw new IndexOutOfRangeException();
+
+			fixed (byte* dataPtr = data)
+			{
+				Copy(dataPtr, offset, PositionPtr, 0, count);
+			}
+
+			_position += count;
 		}
 
 		#endregion
 
-		#region Write
+		#region WriteOnPtr
 
 		/// <summary>
 		/// Writes 8-bit integer value to the underlying array.
 		/// </summary>
 		/// <param name="positionPtr">Pointer to where data should be written.</param>
-		/// <param name="data">Byte value to write.</param>
-		/// <returns>Size of the written value.</returns>
-		private void WriteInt8(byte* positionPtr, byte data)
+		/// <param name="data">8-bit integer value to write.</param>
+		private void WriteInt8OnPtr(byte* positionPtr, byte data)
 		{
 			_array[positionPtr] = data;
-
-			_position += 1;
 		}
 
 		/// <summary>
 		/// Writes 16-bit integer value to the underlying array.
 		/// </summary>
 		/// <param name="positionPtr">Pointer to where data should be written.</param>
-		/// <param name="data">Short value to write.</param>
-		/// <returns>Size of the written value.</returns>
-		private void WriteInt16(byte* positionPtr, short data)
+		/// <param name="data">16-bit integer value to write.</param>
+		private void WriteInt16OnPtr(byte* positionPtr, short data)
 		{
 			if (unchecked((int)positionPtr & 0x01) == 0 && !_changeOrder)
 				_array[(short*)positionPtr] = data;
@@ -355,17 +365,14 @@ namespace UMemory.Unmanaged.Stream.Base
 				_array[positionPtr] = (byte)data;
 				_array[positionPtr + 1] = (byte)(data >> 8);
 			}
-
-			_position += 2;
 		}
 
 		/// <summary>
 		/// Writes 32-bit integer value to the underlying array.
 		/// </summary>
 		/// <param name="positionPtr">Pointer to where data should be written.</param>
-		/// <param name="data">Int value to write.</param>
-		/// <returns>Size of the written value.</returns>
-		private void WriteInt32(byte* positionPtr, int data)
+		/// <param name="data">32-bit integer value to write.</param>
+		private void WriteInt32OnPtr(byte* positionPtr, int data)
 		{
 			if (unchecked((int)positionPtr & 0x03) == 0 && !_changeOrder)
 				_array[(int*)positionPtr] = data;
@@ -384,17 +391,14 @@ namespace UMemory.Unmanaged.Stream.Base
 				_array[positionPtr + 2] = (byte)(data >> 16);
 				_array[positionPtr + 3] = (byte)(data >> 24);
 			}
-
-			_position += 4;
 		}
 
 		/// <summary>
 		/// Writes 64-bit integer value to the underlying array.
 		/// </summary>
 		/// <param name="positionPtr">Pointer to where data should be written.</param>
-		/// <param name="data">Long value to write.</param>
-		/// <returns>Size of the written value.</returns>
-		private void WriteInt64(byte* positionPtr, long data)
+		/// <param name="data">64-bit integer value to write.</param>
+		private void WriteInt64OnPtr(byte* positionPtr, long data)
 		{
 			if (unchecked((int)positionPtr & 0x07) == 0 && !_changeOrder)
 				_array[(long*)positionPtr] = data;
@@ -420,134 +424,6 @@ namespace UMemory.Unmanaged.Stream.Base
 				_array[positionPtr + 6] = (byte)(data >> 48);
 				_array[positionPtr + 7] = (byte)(data >> 56);
 			}
-
-			_position += 8;
-		}
-
-		#endregion
-
-		#region ReadOnPtr
-
-		/// <summary>
-		/// Reads boolean value from the underlying array on specified memory location.
-		/// </summary>
-		/// <param name="positionPtr">Pointer from where value should be read.</param>
-		/// <returns>Read value from the array.</returns>
-		protected internal bool ReadBooleanOnPtr(byte* positionPtr)
-		{
-			return ReadInt8(positionPtr) > 0;
-		}
-
-		/// <summary>
-		/// Reads byte value from the underlying array on specified memory location.
-		/// </summary>
-		/// <param name="positionPtr">Pointer from where value should be read.</param>
-		/// <returns>Read value from the array.</returns>
-		protected internal byte ReadByteOnPtr(byte* positionPtr)
-		{
-			return ReadInt8(positionPtr);
-		}
-
-		/// <summary>
-		/// Reads signed byte value from the underlying array on specified memory location.
-		/// </summary>
-		/// <param name="positionPtr">Pointer from where value should be read.</param>
-		/// <returns>Read value from the array.</returns>
-		protected internal sbyte ReadSByteOnPtr(byte* positionPtr)
-		{
-			return (sbyte)ReadInt8(positionPtr);
-		}
-
-		/// <summary>
-		/// Reads char value from the underlying array on specified memory location.
-		/// </summary>
-		/// <param name="positionPtr">Pointer from where value should be read.</param>
-		/// <returns>Read value from the array.</returns>
-		protected internal char ReadCharOnPtr(byte* positionPtr)
-		{
-			return (char)ReadInt16(positionPtr);
-		}
-
-		/// <summary>
-		/// Reads unsigned short value from the underlying array on specified memory location.
-		/// </summary>
-		/// <param name="positionPtr">Pointer from where value should be read.</param>
-		/// <returns>Read value from the array.</returns>
-		protected internal ushort ReadUInt16OnPtr(byte* positionPtr)
-		{
-			return (ushort)ReadInt16(positionPtr);
-		}
-
-		/// <summary>
-		/// Reads short value from the underlying array on specified memory location.
-		/// </summary>
-		/// <param name="positionPtr">Pointer from where value should be read.</param>
-		/// <returns>Read value from the array.</returns>
-		protected internal short ReadInt16OnPtr(byte* positionPtr)
-		{
-			return ReadInt16(positionPtr);
-		}
-
-		/// <summary>
-		/// Reads unsigned int value from the underlying array on specified memory location.
-		/// </summary>
-		/// <param name="positionPtr">Pointer from where value should be read.</param>
-		/// <returns>Read value from the array.</returns>
-		protected internal uint ReadUInt32OnPtr(byte* positionPtr)
-		{
-			return (uint)ReadInt32(positionPtr);
-		}
-
-		/// <summary>
-		/// Reads int value from the underlying array on specified memory location.
-		/// </summary>
-		/// <param name="positionPtr">Pointer from where value should be read.</param>
-		/// <returns>Read value from the array.</returns>
-		protected internal int ReadInt32OnPtr(byte* positionPtr)
-		{
-			return ReadInt32(positionPtr);
-		}
-
-		/// <summary>
-		/// Reads unsigned long value from the underlying array on specified memory location.
-		/// </summary>
-		/// <param name="positionPtr">Pointer from where value should be read.</param>
-		/// <returns>Read value from the array.</returns>
-		protected internal ulong ReadUInt64OnPtr(byte* positionPtr)
-		{
-			return (ulong)ReadInt64(positionPtr);
-		}
-
-		/// <summary>
-		/// Reads long value from the underlying array on specified memory location.
-		/// </summary>
-		/// <param name="positionPtr">Pointer from where value should be read.</param>
-		/// <returns>Read value from the array.</returns>
-		protected internal long ReadInt64OnPtr(byte* positionPtr)
-		{
-			return ReadInt64(positionPtr);
-		}
-
-		/// <summary>
-		/// Reads float value from the underlying array on specified memory location.
-		/// </summary>
-		/// <param name="positionPtr">Pointer from where value should be read.</param>
-		/// <returns>Read value from the array.</returns>
-		protected internal float ReadFloatOnPtr(byte* positionPtr)
-		{
-			int data = ReadInt32(positionPtr);
-			return *((float*)&data);
-		}
-
-		/// <summary>
-		/// Reads double value from the underlying array on specified memory location.
-		/// </summary>
-		/// <param name="positionPtr">Pointer from where value should be read.</param>
-		/// <returns>Read value from the array</returns>
-		protected internal double ReadDoubleOnPtr(byte* positionPtr)
-		{
-			long data = ReadInt64(positionPtr);
-			return *((double*)&data);
 		}
 
 		#endregion
@@ -555,13 +431,181 @@ namespace UMemory.Unmanaged.Stream.Base
 		#region Read
 
 		/// <summary>
+		/// Reads boolean value from the underlying array on current stream position.
+		/// </summary>
+		/// <returns>Read value from the array.</returns>
+		public bool ReadBool()
+		{
+			bool retVal = ReadInt8OnPtr(PositionPtr) > 0;
+			_position += 1;
+
+			return retVal;
+		}
+
+		/// <summary>
+		/// Reads 8-bit integer value from the underlying array on current stream position.
+		/// </summary>
+		/// <returns>Read value from the array.</returns>
+		public byte ReadUInt8()
+		{
+			byte retVal = ReadInt8OnPtr(PositionPtr);
+			_position += 1;
+
+			return retVal;
+		}
+
+		/// <summary>
+		/// Reads 8-bit signed integer value from the underlying array on current stream position.
+		/// </summary>
+		/// <returns>Read value from the array.</returns>
+		public sbyte ReadInt8()
+		{
+			sbyte retVal = (sbyte)ReadInt8OnPtr(PositionPtr);
+			_position += 1;
+
+			return retVal;
+		}
+
+		/// <summary>
+		/// Reads char value from the underlying array on current stream position.
+		/// </summary>
+		/// <returns>Read value from the array.</returns>
+		public char ReadChar()
+		{
+			char retVal = (char)ReadInt16OnPtr(PositionPtr);
+			_position += 2;
+
+			return retVal;
+		}
+
+		/// <summary>
+		/// Reads 16-bit unsigned integer value from the underlying array on current stream position.
+		/// </summary>
+		/// <returns>Read value from the array.</returns>
+		public ushort ReadUInt16()
+		{
+			ushort retVal = (ushort)ReadInt16OnPtr(PositionPtr);
+			_position += 2;
+
+			return retVal;
+		}
+
+		/// <summary>
+		/// Reads 16-bit signed integer value from the underlying array on current stream position.
+		/// </summary>
+		/// <returns>Read value from the array.</returns>
+		public short ReadInt16()
+		{
+			short retVal = ReadInt16OnPtr(PositionPtr);
+			_position += 2;
+
+			return retVal;
+		}
+
+		/// <summary>
+		/// Reads 32-bit unsigned integer value from the underlying array .
+		/// </summary>
+		/// <returns>Read value from the array.</returns>
+		public uint ReadUInt32()
+		{
+			uint retVal = (uint)ReadInt32OnPtr(PositionPtr);
+			_position += 4;
+
+			return retVal;
+		}
+
+		/// <summary>
+		/// Reads 32-bit signed integer value from the underlying array on current stream position.
+		/// </summary>
+		/// <returns>Read value from the array.</returns>
+		public int ReadInt32()
+		{
+			int retVal = ReadInt32OnPtr(PositionPtr);
+			_position += 4;
+
+			return retVal;
+		}
+
+		/// <summary>
+		/// Reads 64-bit unsigned integer value from the underlying array on current stream position.
+		/// </summary>
+		/// <returns>Read value from the array.</returns>
+		public ulong ReadUInt64()
+		{
+			ulong retVal = (ulong)ReadInt64OnPtr(PositionPtr);
+			_position += 8;
+
+			return retVal;
+		}
+
+		/// <summary>
+		/// Reads 64-bit signed integer value from the underlying array on current stream position.
+		/// </summary>
+		/// <returns>Read value from the array.</returns>
+		public long ReadInt64()
+		{
+			long retVal = ReadInt64OnPtr(PositionPtr);
+			_position += 8;
+
+			return retVal;
+		}
+
+		/// <summary>
+		/// Reads 32-bit floating point value from the underlying array on current stream position.
+		/// </summary>
+		/// <returns>Read value from the array.</returns>
+		public float ReadFloat()
+		{
+			int data = ReadInt32OnPtr(PositionPtr);
+			_position += 4;
+
+			return *((float*)&data);
+		}
+
+		/// <summary>
+		/// Reads 64-bit floating point value from the underlying array on current stream position.
+		/// </summary>
+		/// <returns>Read value from the array</returns>
+		public double ReadDouble()
+		{
+			long data = ReadInt64OnPtr(PositionPtr);
+			_position += 8;
+
+			return *((double*)&data);
+		}
+
+		/// <summary>
+		/// Reads number of bytes in byte array from underlying array on current stream position.
+		/// </summary>
+		/// <param name="count">Number of bytes to read.</param>
+		/// <returns>Byte array with specified number of elements.</returns>
+		public byte[] ReadBytes(int count)
+		{
+			if (!CanSeek(count))
+				throw new IndexOutOfRangeException();
+
+			byte[] retVal = new byte[count];
+
+			fixed (byte* destPtr = retVal)
+			{
+				Copy(PositionPtr, 0, destPtr, 0, count);
+			}
+
+			_position += count;
+			return retVal;
+		}
+
+		#endregion
+
+		#region ReadOnPtr
+
+		/// <summary>
 		/// Reads 8-bit integer value from the underlying array on specified memory location.
 		/// </summary>
 		/// <param name="positionPtr">Pointer from where value should be read.</param>
 		/// <returns>Read value from the array.</returns>
-		private byte ReadInt8(byte* positionPtr)
+		private byte ReadInt8OnPtr(byte* positionPtr)
 		{
-			_position += 1;
 			return _array[positionPtr];
 		}
 
@@ -570,7 +614,7 @@ namespace UMemory.Unmanaged.Stream.Base
 		/// </summary>
 		/// <param name="positionPtr">Pointer from where value should be read.</param>
 		/// <returns>Read value from the array.</returns>
-		private short ReadInt16(byte* positionPtr)
+		private short ReadInt16OnPtr(byte* positionPtr)
 		{
 			short retVal = 0;
 
@@ -587,7 +631,6 @@ namespace UMemory.Unmanaged.Stream.Base
 				retVal |= (short)(_array[positionPtr + 1] << 8);
 			}
 
-			_position += 2;
 			return retVal;
 		}
 
@@ -596,7 +639,7 @@ namespace UMemory.Unmanaged.Stream.Base
 		/// </summary>
 		/// <param name="positionPtr">Pointer from where value should be read.</param>
 		/// <returns>Read value from the array.</returns>
-		private int ReadInt32(byte* positionPtr)
+		private int ReadInt32OnPtr(byte* positionPtr)
 		{
 			int retVal = 0;
 
@@ -617,7 +660,6 @@ namespace UMemory.Unmanaged.Stream.Base
 				retVal |= (int)(_array[positionPtr + 3]) << 24;
 			}
 
-			_position += 4;
 			return retVal;
 		}
 
@@ -626,7 +668,7 @@ namespace UMemory.Unmanaged.Stream.Base
 		/// </summary>
 		/// <param name="positionPtr">Pointer from where value should be read.</param>
 		/// <returns>Read value from the array.</returns>
-		private long ReadInt64(byte* positionPtr)
+		private long ReadInt64OnPtr(byte* positionPtr)
 		{
 			long retVal = 0;
 
@@ -655,7 +697,6 @@ namespace UMemory.Unmanaged.Stream.Base
 				retVal |= (long)(_array[positionPtr + 7]) << 56;
 			}
 
-			_position += 8;
 			return retVal;
 		}
 

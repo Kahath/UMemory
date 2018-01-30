@@ -11,6 +11,9 @@ using UMemory.Unmanaged.Stream.Base;
 
 namespace UMemory.Unmanaged.Stream.Core
 {
+	/// <summary>
+	/// Provides extended fast memory I/O operations on top of unmanaged array.
+	/// </summary>
 	[SecurityCritical]
 	public abstract unsafe class UMemoryStream : UStream
 	{
@@ -39,6 +42,7 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// Instantiates new <see cref="UMemoryStream"/> type.
 		/// </summary>
 		/// <param name="length">Length of the underlying array.</param>
+		/// <param name="endiannessType">Endianness order to Read/Write.</param>
 		public UMemoryStream(int length, EndiannessType endiannessType)
 			: base(length, endiannessType)
 		{
@@ -54,7 +58,6 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// <summary>
 		/// Writes <see cref="IUMemoryWrite"/> instance to stream.
 		/// </summary>
-		/// <typeparam name="T">Type of instance to write.</typeparam>
 		/// <param name="data">Instance to write.</param>
 		public void Write(IUMemoryWrite data)
 		{
@@ -65,138 +68,19 @@ namespace UMemory.Unmanaged.Stream.Core
 		}
 
 		/// <summary>
-		/// Writes boolean value to current stream position.
-		/// Increases stream position.
-		/// </summary>
-		/// <param name="data">Boolean value to write.</param>
-		public void Write(bool data)
-		{
-			WriteOnPtr(PositionPtr, data);
-		}
-
-		/// <summary>
-		/// Writes byte value to current stream position.
-		/// Increases stream position.
-		/// </summary>
-		/// <param name="data">Byte value to write.</param>
-		public void Write(byte data)
-		{
-			WriteOnPtr(PositionPtr, data);
-		}
-
-		/// <summary>
-		/// Writes sbyte value to current stream position.
-		/// Increases stream position.
-		/// </summary>
-		/// <param name="data">SByte value to write.</param>
-		public void Write(sbyte data)
-		{
-			WriteOnPtr(PositionPtr, data);
-		}
-
-		/// <summary>
-		/// Writes char value to current stream position.
-		/// Increases stream position.
-		/// </summary>
-		/// <param name="data">Char value to write.</param>
-		public void Write(char data)
-		{
-			Write((short)data);
-		}
-
-		/// <summary>
-		/// Writes unsigned short value to current stream position.
-		/// Increases stream position.
-		/// </summary>
-		/// <param name="data">Unsigned short value to write.</param>
-		public void Write(ushort data)
-		{
-			WriteOnPtr(PositionPtr, data);
-		}
-
-		/// <summary>
-		/// Writes unsigned int value to current stream position.
-		/// Increases stream position.
-		/// </summary>
-		/// <param name="data">Unsigned int value to write.</param>
-		public void Write(uint data)
-		{
-			WriteOnPtr(PositionPtr, data);
-		}
-
-		/// <summary>
-		/// Writes unsigned long value to current stream position.
-		/// Increases stream position.
-		/// </summary>
-		/// <param name="data">Unsigned long value to write.</param>
-		public void Write(ulong data)
-		{
-			WriteOnPtr(PositionPtr, data);
-		}
-
-		/// <summary>
-		/// Writes short value to current stream position.
-		/// Increases stream position.
-		/// </summary>
-		/// <param name="data">Short value to write.</param>
-		public void Write(short data)
-		{
-			WriteOnPtr(PositionPtr, data);
-		}
-
-		/// <summary>
-		/// Writes int value to current stream position.
-		/// Increases stream position.
-		/// </summary>
-		/// <param name="data">Int value to write.</param>
-		public void Write(int data)
-		{
-			WriteOnPtr(PositionPtr, data);
-		}
-
-		/// <summary>
-		/// Writes long value to current stream position.
-		/// Increases stream position.
-		/// </summary>
-		/// <param name="data">Long value to write.</param>
-		public void Write(long data)
-		{
-			WriteOnPtr(PositionPtr, data);
-		}
-
-		/// <summary>
-		/// Writes float value to current stream position.
-		/// Increases stream position.
-		/// </summary>
-		/// <param name="data">Float value to write.</param>
-		public void Write(float data)
-		{
-			WriteOnPtr(PositionPtr, data);
-		}
-
-		/// <summary>
-		/// Writes double value to current stream position.
-		/// Increases stream position.
-		/// </summary>
-		/// <param name="data">Double value to write.</param>
-		public void Write(double data)
-		{
-			WriteOnPtr(PositionPtr, data);
-		}
-
-		/// <summary>
 		/// Writes string value to current stream position with prefixed length as 7bit encoded int.
 		/// Increases stream position.
 		/// </summary>
 		/// <param name="data">String value to write.</param>
-		public void Write(string data)
+		public void WriteString(string data)
 		{
 			int length = _encoding.GetByteCount(data);
-			Write7BitEncodedInt(length);
+			byte lengthCount = Get7BitEncodedIntPlaces(length);
 
-			if (!CanSeek(length))
+			if (!CanSeek(length + lengthCount))
 				throw new IndexOutOfRangeException();
 
+			Write7BitEncodedInt(length);
 			fixed (char* chrPtr = data)
 			{
 				_encoding.GetBytes(chrPtr, data.Length, PositionPtr, length);
@@ -214,12 +98,12 @@ namespace UMemory.Unmanaged.Stream.Core
 		{
 			if (String.IsNullOrEmpty(data))
 			{
-				Write((byte)0);
+				WriteUInt8(0);
 			}
 			else
 			{
 				int count = _encoding.GetByteCount(data);
-				if (!CanSeek(count))
+				if (!CanSeek(count + 1))
 					throw new IndexOutOfRangeException();
 
 				fixed (char* chrPtr = data)
@@ -228,7 +112,7 @@ namespace UMemory.Unmanaged.Stream.Core
 				}
 
 				Position += count;
-				Write((byte)0);
+				WriteUInt8(0);
 			}
 		}
 
@@ -237,13 +121,9 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// Increases stream position.
 		/// </summary>
 		/// <param name="data">Byte array value to write.</param>
-		public void Write(byte[] data)
+		public void WriteBytes(byte[] data)
 		{
-			int length = data.Length;
-			Write7BitEncodedInt(length);
-
-			CopyFrom(data, 0, Position, (uint)length);
-			Position += length;
+			WriteBytes(data, data.Length);
 		}
 
 		/// <summary>
@@ -251,10 +131,15 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// </summary>
 		/// <param name="data">Byte array value to write.</param>
 		/// <param name="count">Elements count to write.</param>
-		public void Write(byte[] data, int count)
+		public void WriteBytes(byte[] data, int count)
 		{
-			CopyFrom(data, 0, Position, (uint)count);
-			Position += count;
+			byte countPlaces = Get7BitEncodedIntPlaces(count);
+
+			if (!CanSeek(count + countPlaces))
+				throw new IndexOutOfRangeException();
+
+			Write7BitEncodedInt(count);
+			WriteBytes(data, 0, count);
 		}
 
 		/// <summary>
@@ -269,10 +154,29 @@ namespace UMemory.Unmanaged.Stream.Core
 			uint v = (uint)value;   // support negative numbers
 			while (v >= 0x80)
 			{
-				Write((byte)(v | 0x80));
+				WriteUInt8((byte)(v | 0x80));
 				v >>= 7;
 			}
-			Write((byte)v);
+			WriteUInt8((byte)v);
+		}
+
+		/// <summary>
+		/// Gets number of bytes to write for 7bit encoded int.
+		/// </summary>
+		/// <param name="value">Value to write as 7bit encoded value.</param>
+		/// <returns>Number of bytes.</returns>
+		private byte Get7BitEncodedIntPlaces(int value)
+		{
+			byte retVal = 1;
+
+			uint v = (uint)value;
+			while (v >= 0x80)
+			{
+				++retVal;
+				v >>= 7;
+			}
+
+			return retVal;
 		}
 
 		#endregion
@@ -300,114 +204,6 @@ namespace UMemory.Unmanaged.Stream.Core
 		}
 
 		/// <summary>
-		/// Reads boolean value on current stream position.
-		/// </summary>
-		/// <returns>Read boolean value.</returns>
-		public bool ReadBoolean()
-		{
-			return ReadBooleanOnPtr(PositionPtr);
-		}
-
-		/// <summary>
-		/// Reads byte value on current stream position.
-		/// </summary>
-		/// <returns>Read byte value.</returns>
-		public byte ReadByte()
-		{
-			return ReadByteOnPtr(PositionPtr);
-		}
-
-		/// <summary>
-		/// Reads signed byte value on current stream position.
-		/// </summary>
-		/// <returns>Read signed byte value.</returns>
-		public sbyte ReadSByte()
-		{
-			return ReadSByteOnPtr(PositionPtr);
-		}
-
-		/// <summary>
-		/// Reads char value on current stream position.
-		/// </summary>
-		/// <returns>Read char value.</returns>
-		public char ReadChar()
-		{
-			return ReadCharOnPtr(PositionPtr);
-		}
-
-		/// <summary>
-		/// Reads unsigned short value on current stream position.
-		/// </summary>
-		/// <returns>Read unsigned short value.</returns>
-		public ushort ReadUInt16()
-		{
-			return ReadUInt16OnPtr(PositionPtr);
-		}
-
-		/// <summary>
-		/// Reads short value on current stream position.
-		/// </summary>
-		/// <returns>Read short value.</returns>
-		public short ReadInt16()
-		{
-			return ReadInt16OnPtr(PositionPtr);
-		}
-
-		/// <summary>
-		/// Reads unsigned int value on current stream position.
-		/// </summary>
-		/// <returns>Read unsigned int value.</returns>
-		public uint ReadUInt32()
-		{
-			return ReadUInt32OnPtr(PositionPtr);
-		}
-
-		/// <summary>
-		/// Reads int value on current stream position.
-		/// </summary>
-		/// <returns>Read int value.</returns>
-		public int ReadInt32()
-		{
-			return ReadInt32OnPtr(PositionPtr);
-		}
-
-		/// <summary>
-		/// Reads unsigned long value on current stream position.
-		/// </summary>
-		/// <returns>Read unsigned long value.</returns>
-		public ulong ReadUInt64()
-		{
-			return ReadUInt64OnPtr(PositionPtr);
-		}
-
-		/// <summary>
-		/// Reads long value on current stream position.
-		/// </summary>
-		/// <returns>Read long value.</returns>
-		public long ReadInt64()
-		{
-			return ReadInt64OnPtr(PositionPtr);
-		}
-
-		/// <summary>
-		/// Reads float value on current stream position.
-		/// </summary>
-		/// <returns>Read long value.</returns>
-		public float ReadFloat()
-		{
-			return ReadFloatOnPtr(PositionPtr);
-		}
-
-		/// <summary>
-		/// Reads double value on current stream position.
-		/// </summary>
-		/// <returns>Read double value.</returns>
-		public double ReadDouble()
-		{
-			return ReadDoubleOnPtr(PositionPtr);
-		}
-
-		/// <summary>
 		/// Reads string value on current stream position.
 		/// String length is prefixed with 7bit encoded int.
 		/// </summary>
@@ -431,14 +227,14 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// <returns>Read string value.</returns>
 		public string ReadCString()
 		{
-			int count = Seek((byte)0);
+			int count = SeekValue(0);
 
-			if (!CanSeek(count))
+			if (!CanSeek(count + 1))
 				throw new IndexOutOfRangeException();
 
 			string retVal = _encoding.GetString(PositionPtr, count);
 			Position += count;
-			ReadByte();
+			ReadUInt8();
 
 			return retVal;
 		}
@@ -452,21 +248,6 @@ namespace UMemory.Unmanaged.Stream.Core
 		{
 			int length = Read7BitEncodedInt();
 			return ReadBytes(length);
-		}
-
-		/// <summary>
-		/// Reads byte array value on current stream position with given elements count.
-		/// </summary>
-		/// <param name="count">Array elements count.</param>
-		/// <returns>Read byte array value.</returns>
-		public byte[] ReadBytes(int count)
-		{
-			byte[] retVal = new byte[count];
-
-			CopyTo(Position, retVal, 0, (uint)count);
-			Position += count;
-
-			return retVal;
 		}
 
 		/// <summary>
@@ -490,7 +271,7 @@ namespace UMemory.Unmanaged.Stream.Core
 					throw new FormatException("Wrong format");
 
 				// ReadByte handles end of stream cases for us.
-				b = ReadByte();
+				b = ReadUInt8();
 				count |= (b & 0x7F) << shift;
 				shift += 7;
 			} while ((b & 0x80) != 0);
