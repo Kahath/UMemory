@@ -118,8 +118,9 @@ namespace UMemory.Test
 		{
 			TestStream stream = new TestStream(2, EndiannessType.LittleEndian);
 			stream.WriteBool(true);
+			stream.WriteBool(false);
 
-			Assert.AreEqual(1, stream.Position);
+			Assert.AreEqual(2, stream.Position);
 
 			stream.Seek(0);
 
