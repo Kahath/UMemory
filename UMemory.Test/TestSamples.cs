@@ -1,4 +1,9 @@
-﻿using UMemory.Unmanaged.Stream.Base;
+﻿/*
+ * Copyright © Kahath 2018
+ * Licensed under MIT license.
+ */
+
+using UMemory.Unmanaged.Stream.Base;
 using UMemory.Unmanaged.Stream.Core;
 
 namespace UMemory.Test

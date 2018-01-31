@@ -1,4 +1,9 @@
-﻿using UMemory.Unmanaged.Enums;
+﻿/*
+ * Copyright © Kahath 2018
+ * Licensed under MIT license.
+ */
+
+using UMemory.Unmanaged.Enums;
 using UMemory.Unmanaged.Stream.Core;
 
 namespace UMemory.Test
