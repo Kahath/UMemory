@@ -158,7 +158,7 @@ namespace UMemory.Unmanaged.Stream.Base
 			byte* positionPtr = PositionPtr;
 			int count = 0;
 
-			while (Array[positionPtr + count] != value)
+			while (_array[positionPtr + count] != value)
 				++count;
 
 			return count;
@@ -171,7 +171,7 @@ namespace UMemory.Unmanaged.Stream.Base
 		/// <returns>Boolean value.</returns>
 		public bool CanSeek(int offset)
 		{
-			return offset >= 0 && offset <= Array.Length;
+			return offset >= 0 && offset <= _array.Length;
 		}
 
 		#endregion
@@ -184,6 +184,9 @@ namespace UMemory.Unmanaged.Stream.Base
 		/// <param name="count">Count.</param>
 		public void Skip(int count)
 		{
+			if (!CanSeek(_position + count))
+				throw new IndexOutOfRangeException();
+
 			_position += count;
 		}
 

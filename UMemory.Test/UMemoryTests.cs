@@ -11,6 +11,7 @@ namespace UMemory.Test
 	{
 		#region Basic
 
+		[TestCategory("Basic")]
 		[TestMethod]
 		public void NewUMemoryStreamTest()
 		{
@@ -20,6 +21,7 @@ namespace UMemory.Test
 			Assert.AreEqual(EndiannessType.LittleEndian, stream.EndianessType);
 		}
 
+		[TestCategory("Basic")]
 		[TestMethod]
 		public void AllocTest()
 		{
@@ -29,15 +31,17 @@ namespace UMemory.Test
 			Assert.AreEqual(15, stream.Capacity);
 		}
 
+		[TestCategory("Basic")]
 		[TestMethod]
-		public void ReAllocTest()
+		public void ReallocTest()
 		{
 			TestStream stream = new TestStream(15, EndiannessType.LittleEndian);
-			stream.Alloc(2);
+			stream.Realloc(2);
 
 			Assert.AreEqual(2, stream.Capacity);
 		}
 
+		[TestCategory("Basic")]
 		[TestMethod]
 		public void FreeTest()
 		{
@@ -47,6 +51,7 @@ namespace UMemory.Test
 			Assert.AreEqual(0, stream.Capacity);
 		}
 
+		[TestCategory("Basic")]
 		[TestMethod]
 		[ExpectedException(typeof(IndexOutOfRangeException))]
 		public void IndexOutOfRangeTest()
@@ -55,6 +60,7 @@ namespace UMemory.Test
 			stream.Seek(1);
 		}
 
+		[TestCategory("Basic")]
 		[TestMethod]
 		public void SeekTest()
 		{
@@ -64,6 +70,7 @@ namespace UMemory.Test
 			Assert.AreEqual(1, stream.Position);
 		}
 
+		[TestCategory("Basic")]
 		[TestMethod]
 		public void SeekValueTest()
 		{
@@ -78,6 +85,7 @@ namespace UMemory.Test
 			Assert.AreEqual(2, stream.SeekValue(3));
 		}
 
+		[TestCategory("Basic")]
 		[TestMethod]
 		public void CanSeekTest()
 		{
@@ -88,14 +96,27 @@ namespace UMemory.Test
 			Assert.IsTrue(!stream.CanSeek(6));
 		}
 
+		[TestCategory("Basic")]
+		[TestMethod]
+		public void SkipTest()
+		{
+			TestStream stream = new TestStream(5, EndiannessType.LittleEndian);
+
+			stream.Skip(3);
+			Assert.AreEqual(3, stream.Position);
+
+			Assert.ThrowsException<IndexOutOfRangeException>(() => stream.Skip(3));
+		}
+
 		#endregion
 
 		#region I/O
 
+		[TestCategory("IO")]
 		[TestMethod]
 		public void BoolTest()
 		{
-			TestStream stream = new TestStream(1, EndiannessType.LittleEndian);
+			TestStream stream = new TestStream(2, EndiannessType.LittleEndian);
 			stream.WriteBool(true);
 
 			Assert.AreEqual(1, stream.Position);
@@ -103,9 +124,11 @@ namespace UMemory.Test
 			stream.Seek(0);
 
 			Assert.AreEqual(true, stream.ReadBool());
-			Assert.AreEqual(1, stream.Position);
+			Assert.AreEqual(false, stream.ReadBool());
+			Assert.AreEqual(2, stream.Position);
 		}
 
+		[TestCategory("IO")]
 		[TestMethod]
 		public void Int8Test()
 		{
@@ -120,6 +143,7 @@ namespace UMemory.Test
 			Assert.AreEqual(1, stream.Position);
 		}
 
+		[TestCategory("IO")]
 		[TestMethod]
 		public void UInt8Test()
 		{
@@ -134,8 +158,9 @@ namespace UMemory.Test
 			Assert.AreEqual(1, stream.Position);
 		}
 
+		[TestCategory("IO"), TestCategory("LittleEndian")]
 		[TestMethod]
-		public void Int16Test()
+		public void Int16LittleEndianTest()
 		{
 			TestStream stream = new TestStream(2, EndiannessType.LittleEndian);
 			stream.WriteInt16(1);
@@ -148,8 +173,24 @@ namespace UMemory.Test
 			Assert.AreEqual(2, stream.Position);
 		}
 
+		[TestCategory("IO"), TestCategory("BigEndian")]
 		[TestMethod]
-		public void UInt16Test()
+		public void Int16BigEndianTest()
+		{
+			TestStream stream = new TestStream(2, EndiannessType.BigEndian);
+			stream.WriteInt16(1);
+
+			Assert.AreEqual(2, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1, stream.ReadInt16());
+			Assert.AreEqual(2, stream.Position);
+		}
+
+		[TestCategory("IO"), TestCategory("LittleEndian")]
+		[TestMethod]
+		public void UInt16LittleEndianTest()
 		{
 			TestStream stream = new TestStream(2, EndiannessType.LittleEndian);
 			stream.WriteUInt16(1);
@@ -162,8 +203,24 @@ namespace UMemory.Test
 			Assert.AreEqual(2, stream.Position);
 		}
 
+		[TestCategory("IO"), TestCategory("BigEndian")]
 		[TestMethod]
-		public void Int32Test()
+		public void UInt16BigEndianTest()
+		{
+			TestStream stream = new TestStream(2, EndiannessType.BigEndian);
+			stream.WriteUInt16(1);
+
+			Assert.AreEqual(2, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1, stream.ReadUInt16());
+			Assert.AreEqual(2, stream.Position);
+		}
+
+		[TestCategory("IO"), TestCategory("LittleEndian")]
+		[TestMethod]
+		public void Int32LittleEndianTest()
 		{
 			TestStream stream = new TestStream(4, EndiannessType.LittleEndian);
 			stream.WriteInt32(1);
@@ -176,8 +233,24 @@ namespace UMemory.Test
 			Assert.AreEqual(4, stream.Position);
 		}
 
+		[TestCategory("IO"), TestCategory("BigEndian")]
 		[TestMethod]
-		public void UInt32Test()
+		public void Int32BigEndianTest()
+		{
+			TestStream stream = new TestStream(4, EndiannessType.BigEndian);
+			stream.WriteInt32(1);
+
+			Assert.AreEqual(4, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1, stream.ReadInt32());
+			Assert.AreEqual(4, stream.Position);
+		}
+
+		[TestCategory("IO"), TestCategory("LittleEndian")]
+		[TestMethod]
+		public void UInt32LittleEndianTest()
 		{
 			TestStream stream = new TestStream(4, EndiannessType.LittleEndian);
 			stream.WriteUInt32(1);
@@ -190,8 +263,24 @@ namespace UMemory.Test
 			Assert.AreEqual(4, stream.Position);
 		}
 
+		[TestCategory("IO"), TestCategory("BigEndian")]
 		[TestMethod]
-		public void Int64Test()
+		public void UInt32BigEndianTest()
+		{
+			TestStream stream = new TestStream(4, EndiannessType.BigEndian);
+			stream.WriteUInt32(1);
+
+			Assert.AreEqual(4, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual((uint)1, stream.ReadUInt32());
+			Assert.AreEqual(4, stream.Position);
+		}
+
+		[TestCategory("IO"), TestCategory("LittleEndian")]
+		[TestMethod]
+		public void Int64LittleEndianTest()
 		{
 			TestStream stream = new TestStream(8, EndiannessType.LittleEndian);
 			stream.WriteInt64(1);
@@ -204,8 +293,24 @@ namespace UMemory.Test
 			Assert.AreEqual(8, stream.Position);
 		}
 
+		[TestCategory("IO"), TestCategory("BigEndian")]
 		[TestMethod]
-		public void UInt64Test()
+		public void Int64BigEndianTest()
+		{
+			TestStream stream = new TestStream(8, EndiannessType.BigEndian);
+			stream.WriteInt64(1);
+
+			Assert.AreEqual(8, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1, stream.ReadInt64());
+			Assert.AreEqual(8, stream.Position);
+		}
+
+		[TestCategory("IO"), TestCategory("LittleEndian")]
+		[TestMethod]
+		public void UInt64LittleEndianTest()
 		{
 			TestStream stream = new TestStream(8, EndiannessType.LittleEndian);
 			stream.WriteUInt64(1);
@@ -218,8 +323,24 @@ namespace UMemory.Test
 			Assert.AreEqual(8, stream.Position);
 		}
 
+		[TestCategory("IO"), TestCategory("BigEndian")]
 		[TestMethod]
-		public void FloatTest()
+		public void UInt64BigEndianTest()
+		{
+			TestStream stream = new TestStream(8, EndiannessType.BigEndian);
+			stream.WriteUInt64(1);
+
+			Assert.AreEqual(8, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual((ulong)1, stream.ReadUInt64());
+			Assert.AreEqual(8, stream.Position);
+		}
+
+		[TestCategory("IO"), TestCategory("LittleEndian")]
+		[TestMethod]
+		public void FloatLittleEndianTest()
 		{
 			TestStream stream = new TestStream(4, EndiannessType.LittleEndian);
 			stream.WriteFloat(1.435F);
@@ -232,8 +353,24 @@ namespace UMemory.Test
 			Assert.AreEqual(4, stream.Position);
 		}
 
+		[TestCategory("IO"), TestCategory("BigEndian")]
 		[TestMethod]
-		public void DoubleTest()
+		public void FloatBigEndianTest()
+		{
+			TestStream stream = new TestStream(4, EndiannessType.BigEndian);
+			stream.WriteFloat(1.435F);
+
+			Assert.AreEqual(4, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1.435F, stream.ReadFloat());
+			Assert.AreEqual(4, stream.Position);
+		}
+
+		[TestCategory("IO"), TestCategory("LittleEndian")]
+		[TestMethod]
+		public void DoubleLittleEndianTest()
 		{
 			TestStream stream = new TestStream(8, EndiannessType.LittleEndian);
 			stream.WriteDouble(1.4456346534D);
@@ -246,6 +383,22 @@ namespace UMemory.Test
 			Assert.AreEqual(8, stream.Position);
 		}
 
+		[TestCategory("IO"), TestCategory("BigEndian")]
+		[TestMethod]
+		public void DoubleBigEndianTest()
+		{
+			TestStream stream = new TestStream(8, EndiannessType.BigEndian);
+			stream.WriteDouble(1.4456346534D);
+
+			Assert.AreEqual(8, stream.Position);
+
+			stream.Seek(0);
+
+			Assert.AreEqual(1.4456346534D, stream.ReadDouble());
+			Assert.AreEqual(8, stream.Position);
+		}
+
+		[TestCategory("IO")]
 		[TestMethod]
 		public void StringTest()
 		{
@@ -266,6 +419,7 @@ namespace UMemory.Test
 			Assert.AreEqual(15, stream.Position);
 		}
 
+		[TestCategory("IO")]
 		[TestMethod]
 		public void StringExceptionTest()
 		{
@@ -279,6 +433,7 @@ namespace UMemory.Test
 			Assert.ThrowsException<IndexOutOfRangeException>(() => stream.ReadString());
 		}
 
+		[TestCategory("IO")]
 		[TestMethod]
 		public void CStringTest()
 		{
@@ -299,6 +454,7 @@ namespace UMemory.Test
 			Assert.AreEqual(15, stream.Position);
 		}
 
+		[TestCategory("IO")]
 		[TestMethod]
 		public void CStringExceptionTest()
 		{
@@ -313,6 +469,7 @@ namespace UMemory.Test
 			Assert.ThrowsException<IndexOutOfRangeException>(() => stream.ReadCString());
 		}
 
+		[TestCategory("IO")]
 		[TestMethod]
 		public void BytesTest()
 		{
@@ -341,6 +498,7 @@ namespace UMemory.Test
 			Assert.AreEqual(17, stream.Position);
 		}
 
+		[TestCategory("IO")]
 		[TestMethod]
 		public void BytesExceptionTest()
 		{
@@ -356,8 +514,9 @@ namespace UMemory.Test
 			Assert.ThrowsException<IndexOutOfRangeException>(() => stream.ReadBytes(11));
 		}
 
+		[TestCategory("IO")]
 		[TestMethod]
-		public void CustomTest()
+		public void CustomTypeTest()
 		{
 			TestStream stream = new TestStream(21, EndiannessType.LittleEndian);
 			TestSample sample = new TestSample();
@@ -376,12 +535,23 @@ namespace UMemory.Test
 			Assert.AreEqual("Sample string", sample.SampleString);
 
 			Assert.AreEqual(21, stream.Position);
+			stream.Seek(0);
+
+			TestSample newSample = stream.Read<TestSample>();
+
+			Assert.AreEqual(1, sample.SampleByte);
+			Assert.AreEqual(2, sample.SampleShort);
+			Assert.AreEqual(5, sample.SampleInt);
+			Assert.AreEqual("Sample string", sample.SampleString);
+
+			Assert.AreEqual(21, stream.Position);
 		}
 
 		#endregion
 
 		#region Endianness
 
+		[TestCategory("Endianness")]
 		[TestMethod]
 		public void EndiannessTest()
 		{
@@ -451,8 +621,11 @@ namespace UMemory.Test
 
 		#endregion
 
+		#region Custom
+
+		[TestCategory("Custom")]
 		[TestMethod]
-		public void TestGeneralReadWrite()
+		public void GeneralIOTest()
 		{
 			const int iterations = 500;
 			const int iterationBytes = 60;
@@ -533,8 +706,9 @@ namespace UMemory.Test
 		}
 
 #if !DEBUG
+		[TestCategory("Custom")]
 		[TestMethod]
-		public void TestPerformance()
+		public void PerformanceTest()
 		{
 			const int iterations = 500;
 			const int allocateBytes = iterations * 50;
@@ -631,5 +805,6 @@ namespace UMemory.Test
 			Assert.IsTrue(umReadElapsedTicks < msReadElapsedTicks);
 		}
 #endif
+		#endregion
 	}
 }
