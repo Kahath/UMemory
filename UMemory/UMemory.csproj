@@ -48,8 +48,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Unmanaged\Array\UArray.cs" />
     <Compile Include="Unmanaged\Enums\EndiannessType.cs" />
-    <Compile Include="Unmanaged\Stream\Base\IUMemoryRead.cs" />
-    <Compile Include="Unmanaged\Stream\Base\IUMemoryWrite.cs" />
+    <Compile Include="Unmanaged\Stream\Core\IUMemoryRead.cs" />
+    <Compile Include="Unmanaged\Stream\Core\IUMemoryWrite.cs" />
     <Compile Include="Unmanaged\Stream\Base\UStream.cs" />
     <Compile Include="Unmanaged\Stream\Core\UMemoryStream.cs" />
   </ItemGroup>

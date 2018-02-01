@@ -75,9 +75,9 @@ namespace UMemory.Unmanaged.Stream.Core
 		public void WriteString(string data)
 		{
 			int length = _encoding.GetByteCount(data);
-			byte lengthCount = Get7BitEncodedIntPlaces(length);
+			byte bytesCount = Get7BitEncodedIntByteCount(length);
 
-			if (!CanSeek(length + lengthCount))
+			if (!CanSeek(length + bytesCount))
 				throw new IndexOutOfRangeException();
 
 			Write7BitEncodedInt(length);
@@ -133,9 +133,9 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// <param name="count">Elements count to write.</param>
 		public void WriteBytes(byte[] data, int count)
 		{
-			byte countPlaces = Get7BitEncodedIntPlaces(count);
+			byte bytesCount = Get7BitEncodedIntByteCount(count);
 
-			if (!CanSeek(count + countPlaces))
+			if (!CanSeek(count + bytesCount))
 				throw new IndexOutOfRangeException();
 
 			Write7BitEncodedInt(count);
@@ -144,7 +144,7 @@ namespace UMemory.Unmanaged.Stream.Core
 
 		/// <summary>
 		/// Writes 7bit encoded int to stream.
-		/// Taken from https://github.com/Microsoft/referencesource/blob/4fe4349175f4c5091d972a7e56ea12012f1e7170/mscorlib/system/io/binarywriter.cs
+		/// Taken from https://github.com/Microsoft/referencesource/blob/4fe4349175f4c5091d972a7e56ea12012f1e7170/mscorlib/system/io/binarywriter.cs#L414
 		/// </summary>
 		/// <param name="value"></param>
 		private void Write7BitEncodedInt(int value)
@@ -165,7 +165,7 @@ namespace UMemory.Unmanaged.Stream.Core
 		/// </summary>
 		/// <param name="value">Value to write as 7bit encoded value.</param>
 		/// <returns>Number of bytes.</returns>
-		private byte Get7BitEncodedIntPlaces(int value)
+		private byte Get7BitEncodedIntByteCount(int value)
 		{
 			byte retVal = 1;
 
@@ -252,7 +252,7 @@ namespace UMemory.Unmanaged.Stream.Core
 
 		/// <summary>
 		/// Reads 7bit encoded int.
-		/// Taken from https://github.com/Microsoft/referencesource/blob/4fe4349175f4c5091d972a7e56ea12012f1e7170/mscorlib/system/io/binaryreader.cs
+		/// Taken from https://github.com/Microsoft/referencesource/blob/4fe4349175f4c5091d972a7e56ea12012f1e7170/mscorlib/system/io/binaryreader.cs#L582
 		/// </summary>
 		/// <returns>int value.</returns>
 		private int Read7BitEncodedInt()

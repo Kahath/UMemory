@@ -5,17 +5,17 @@
 
 using UMemory.Unmanaged.Stream.Core;
 
-namespace UMemory.Unmanaged.Stream.Base
+namespace UMemory.Unmanaged.Stream.Core
 {
 	/// <summary>
-	/// Provides custom type Read operations
+	/// Provides custom type Write operations.
 	/// </summary>
-	public interface IUMemoryWrite
+	public interface IUMemoryRead
 	{
 		/// <summary>
-		/// Reads custom type from stream.
+		/// Writes custom type to stream.
 		/// </summary>
 		/// <param name="stream"><see cref="UMemoryStream"/> instance.</param>
-		void Write(UMemoryStream stream);
+		void Read(UMemoryStream stream);
 	}
 }

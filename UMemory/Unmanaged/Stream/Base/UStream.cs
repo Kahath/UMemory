@@ -711,7 +711,7 @@ namespace UMemory.Unmanaged.Stream.Base
 
 		/// <summary>
 		/// Performs array copy optimized for x86 platform.
-		/// Modified https://github.com/Microsoft/referencesource/blob/master/mscorlib/system/buffer.cs Memmove method
+		/// Modified https://github.com/Microsoft/referencesource/blob/master/mscorlib/system/buffer.cs#L279
 		/// </summary>
 		/// <param name="src">Pointer of source first element.</param>
 		/// <param name="dest">Pointer of destination first element.</param>
@@ -871,7 +871,7 @@ namespace UMemory.Unmanaged.Stream.Base
 
 		/// <summary>
 		/// Performs array copy optimized for x64 platform.
-		/// Modified https://github.com/Microsoft/referencesource/blob/master/mscorlib/system/buffer.cs Memmove method
+		/// Modified https://github.com/Microsoft/referencesource/blob/master/mscorlib/system/buffer.cs#L277
 		/// </summary>
 		/// <param name="src">Pointer of source first element.</param>
 		/// <param name="dest">Pointer of destination first element.</param>
